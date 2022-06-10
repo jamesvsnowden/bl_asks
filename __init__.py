@@ -7,10 +7,31 @@ from bpy.props import StringProperty
 from rna_prop_ui import rna_idprop_ui_create
 import bpy
 if TYPE_CHECKING:
-    from bpy.types import Driver, DriverVariable, Key, ShapeKey
+    from bpy.types import Driver, DriverVariable, Key, ShapeKey, UILayout
 
 MESSAGE_BROKER = object()
+COMPAT_ENGINES = {'BLENDER_RENDER', 'BLENDER_EEVEE', 'BLENDER_WORKBENCH'}
+COMPAT_OBJECTS = {'MESH', 'LATTICE', 'CURVE', 'SURFACE'}
 _namespace = ""
+
+
+def split_layout(layout: 'UILayout', label: Optional[str]="", padding: Optional[float]=0.0):
+    split = layout.split(factor=0.385)
+        
+    row = split.row()
+    row.alignment = 'RIGHT'
+    if label:
+        row.label(text=label)
+    else:
+        row.label(icon='BLANK1')
+
+    row = split.row()
+    col = row.column(align=True)
+
+    if padding:
+        row.separator(factor=padding)
+
+    return col
 
 
 def idprop_ensure(key: 'Key', name: str) -> None:
@@ -67,6 +88,18 @@ T = TypeVar("T", bound=ASKSComponent)
 
 
 class ASKSNamespace(Generic[T]):
+
+    @property
+    def collection__internal__(self):
+        raise NotImplementedError(f'{self.__class__.__name__}.collection__internal__')
+
+    def __contains__(self, key: Union[T, str]) -> bool:
+        if isinstance(key, str):
+            return self.find(key) != -1
+        for item in self:
+            if item == key:
+                return True
+        return False
 
     def __len__(self) -> int:
         return len(self.collection__internal__)
