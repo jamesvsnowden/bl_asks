@@ -1,5 +1,5 @@
 
-from typing import TYPE_CHECKING, Callable, Optional
+from typing import TYPE_CHECKING, Generic, Iterator, List, Optional, Tuple, TypeVar, Union
 from uuid import uuid4
 import bpy
 from bpy.types import PropertyGroup
@@ -11,7 +11,6 @@ if TYPE_CHECKING:
 
 MESSAGE_BROKER = object()
 _namespace = ""
-_setup_component = None
 
 
 def idprop_ensure(key: 'Key', name: str) -> None:
@@ -59,6 +58,40 @@ class ASKSComponent(Identifiable):
     def weight_property_path(self) -> str:
         return f'["{self.weight_property_name}"]'
 
+    def __init__(self) -> None:
+        key = self.id_data
+        idprop_ensure(key, self.weight_property_name)
+        idprop_ensure(key, self.influence_property_name)
+
+T = TypeVar("T", bound=ASKSComponent)
+
+
+class ASKSNamespace(Generic[T]):
+
+    def __len__(self) -> int:
+        return len(self.collection__internal__)
+
+    def __iter__(self) -> Iterator[T]:
+        return iter(self.collection__internal__)
+
+    def __getitem__(self, key: Union[str, int, slice]) -> Union[T, List[T]]:
+        return self.collection__internal__[key]
+
+    def find(self, key: str) -> int:
+        return self.collection__internal__.find(key)
+
+    def get(self, name: str, fallback: Optional[object]=None) -> Optional[T]:
+        return self.collection__internal__.get(name, fallback)
+
+    def keys(self) -> Iterator[str]:
+        return self.collection__internal__.keys()
+
+    def items(self) -> Iterator[Tuple[str, T]]:
+        return self.collection__internal__.items()
+
+    def values(self) -> Iterator[T]:
+        return self.collection__internal__.values()
+
 
 def add_proxy_variable(driver: 'Driver', component: ASKSComponent) -> None:
     var = driver.variables.new()
@@ -101,25 +134,6 @@ def shape_key_name_update_handler():
                             co["name"] = kb.name
 
 
-def setup():
-    keys = bpy.data.shape_keys
-    if keys:
-        for key in keys:
-            if key.is_property_set(_namespace):
-                for co in getattr(key, _namespace):
-                    if isinstance(co, ASKSComponent):
-                        idprop_ensure(key, co.weight_property_name)
-                        idprop_ensure(key, co.influence_property_name)
-                        if _setup_component:
-                            _setup_component(co)
-
-
-def try_setup():
-    try:
-        setup()
-    except AttributeError: pass
-
-
 @bpy.app.handlers.persistent
 def load_post_handler(_=None) -> None:
     bpy.msgbus.clear_by_owner(MESSAGE_BROKER)
@@ -128,20 +142,10 @@ def load_post_handler(_=None) -> None:
                              args=tuple(),
                              notify=shape_key_name_update_handler)
 
-    # On initial load accessing bpy.data.shape_keys will raise AttributeError.
-    # Retry after 5 seconds.
-    try:
-        setup()
-    except AttributeError:
-        bpy.app.timers.register(try_setup, first_interval=5)
 
-
-def register(namespace: str, setup_component: Optional[Callable[[ASKSComponent], None]]=None):
+def register(namespace: str):
     global _namespace
     _namespace = namespace
-    if setup_component:
-        global _setup_component
-        _setup_component = setup_component
     bpy.app.handlers.load_post.append(load_post_handler)
     load_post_handler() # Ensure messages are subscribed to on first install
 
