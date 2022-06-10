@@ -1,6 +1,5 @@
 
 from typing import TYPE_CHECKING, Callable, Optional
-from operator import attrgetter
 from uuid import uuid4
 import bpy
 from bpy.types import PropertyGroup
@@ -12,8 +11,7 @@ if TYPE_CHECKING:
 
 MESSAGE_BROKER = object()
 _namespace = ""
-_nodetree_node_ensure = None
-_component_curve_path = ""
+_setup_component = None
 
 
 def idprop_ensure(key: 'Key', name: str) -> None:
@@ -112,9 +110,8 @@ def setup():
                     if isinstance(co, ASKSComponent):
                         idprop_ensure(key, co.weight_property_name)
                         idprop_ensure(key, co.influence_property_name)
-                        if _nodetree_node_ensure and _component_curve_path:
-                            curve = attrgetter(_component_curve_path)(co)
-                            _nodetree_node_ensure(curve.node_identifier, curve)
+                        if _setup_component:
+                            _setup_component(co)
 
 
 def try_setup():
@@ -139,13 +136,12 @@ def load_post_handler(_=None) -> None:
         bpy.app.timers.register(try_setup, first_interval=5)
 
 
-def register(namespace: str, curvepath: Optional[str]="", ensurenode: Optional[Callable]=None):
+def register(namespace: str, setup_component: Optional[Callable[[ASKSComponent], None]]=None):
     global _namespace
-    global _component_curve_path
-    global _nodetree_node_ensure
     _namespace = namespace
-    _component_curve_path = curvepath
-    _nodetree_node_ensure = ensurenode
+    if setup_component:
+        global _setup_component
+        _setup_component = setup_component
     bpy.app.handlers.load_post.append(load_post_handler)
     load_post_handler() # Ensure messages are subscribed to on first install
 
