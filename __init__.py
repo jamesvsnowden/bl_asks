@@ -15,7 +15,7 @@ COMPAT_OBJECTS = {'MESH', 'LATTICE', 'CURVE', 'SURFACE'}
 _namespace = ""
 
 
-def split_layout(layout: 'UILayout', label: Optional[str]="", padding: Optional[float]=0.0):
+def split_layout(layout: 'UILayout', label: Optional[str]="", padding: Optional[Union[float, bool]]=False):
     split = layout.split(factor=0.385)
         
     row = split.row()
@@ -29,7 +29,8 @@ def split_layout(layout: 'UILayout', label: Optional[str]="", padding: Optional[
     col = row.column(align=True)
 
     if padding:
-        row.separator(factor=padding)
+        factor = padding if isinstance(padding, float) else 2.0
+        row.separator(factor=factor)
 
     return col
 
