@@ -18,8 +18,9 @@ _namespace = ""
 def split_layout(layout: 'UILayout',
                  label: Optional[str]="",
                  align: Optional[bool]=False,
+                 factor: Optional[float]=0.385,
                  padding: Optional[Union[float, bool]]=False):
-    split = layout.split(factor=0.385)
+    split = layout.split(factor=factor)
         
     row = split.row()
     row.alignment = 'RIGHT'
