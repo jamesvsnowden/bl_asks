@@ -2,12 +2,12 @@
 from typing import TYPE_CHECKING, Generic, Iterator, List, Optional, Tuple, TypeVar, Union
 from uuid import uuid4
 import bpy
-from bpy.types import PropertyGroup
+from bpy.types import PropertyGroup, ShapeKey
 from bpy.props import StringProperty
 from rna_prop_ui import rna_idprop_ui_create
 import bpy
 if TYPE_CHECKING:
-    from bpy.types import Driver, DriverVariable, Key, ShapeKey, UILayout
+    from bpy.types import Driver, DriverVariable, Key, UILayout
 
 MESSAGE_BROKER = object()
 COMPAT_ENGINES = {'BLENDER_RENDER', 'BLENDER_EEVEE', 'BLENDER_WORKBENCH'}
@@ -97,7 +97,11 @@ class ASKSNamespace(Generic[T]):
     def collection__internal__(self):
         raise NotImplementedError(f'{self.__class__.__name__}.collection__internal__')
 
-    def __contains__(self, key: Union[T, str]) -> bool:
+    def __contains__(self, key: Union[T, str, ShapeKey]) -> bool:
+        if isinstance(key, ShapeKey):
+            if not key.id_data != self.id_data:
+                return False
+            key = key.name
         if isinstance(key, str):
             return self.find(key) != -1
         for item in self:
@@ -111,14 +115,24 @@ class ASKSNamespace(Generic[T]):
     def __iter__(self) -> Iterator[T]:
         return iter(self.collection__internal__)
 
-    def __getitem__(self, key: Union[str, int, slice]) -> Union[T, List[T]]:
+    def __getitem__(self, key: Union[str, int, slice, ShapeKey]) -> Union[T, List[T]]:
+        if isinstance(key, ShapeKey) and key.id_data == self.id_data:
+            key = key.name
         return self.collection__internal__[key]
 
     def find(self, key: str) -> int:
+        if isinstance(key, ShapeKey):
+            if key.id_data != self.id_data:
+                return -1
+            key = key.name
         return self.collection__internal__.find(key)
 
-    def get(self, name: str, fallback: Optional[object]=None) -> Optional[T]:
-        return self.collection__internal__.get(name, fallback)
+    def get(self, key: Union[str, ShapeKey], fallback: Optional[object]=None) -> Optional[T]:
+        if isinstance(key, ShapeKey):
+            if key.id_data != self.id_data:
+                return fallback
+            key = key.name
+        return self.collection__internal__.get(key, fallback)
 
     def keys(self) -> Iterator[str]:
         return self.collection__internal__.keys()
