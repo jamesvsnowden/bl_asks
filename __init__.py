@@ -99,7 +99,7 @@ class ASKSNamespace(Generic[T]):
 
     def __contains__(self, key: Union[T, str, ShapeKey]) -> bool:
         if isinstance(key, ShapeKey):
-            if not key.id_data != self.id_data:
+            if key.id_data != self.id_data:
                 return False
             key = key.name
         if isinstance(key, str):
