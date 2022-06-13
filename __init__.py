@@ -121,7 +121,7 @@ class ASKSNamespace(Generic[T]):
             key = key.name
         return self.collection__internal__[key]
 
-    def find(self, key: str) -> int:
+    def find(self, key: Union[str, ShapeKey]) -> int:
         if isinstance(key, ShapeKey):
             if key.id_data != self.id_data:
                 return -1
