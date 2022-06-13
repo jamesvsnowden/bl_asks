@@ -141,6 +141,9 @@ class ASKSNamespace(Generic[T]):
     def items(self) -> Iterator[Tuple[str, T]]:
         return self.collection__internal__.items()
 
+    def search(self, identifier: str) -> Optional[T]:
+        return next((item for item in self if item.identifier == identifier), None)
+
     def values(self) -> Iterator[T]:
         return self.collection__internal__.values()
 
