@@ -1,5 +1,5 @@
 
-from typing import TYPE_CHECKING, Generic, Iterator, List, Optional, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Generic, Iterator, List, Optional, Tuple, TypeVar, Union
 from uuid import uuid4
 import bpy
 from bpy.types import PropertyGroup, ShapeKey
@@ -148,6 +148,27 @@ class ASKSNamespace(Generic[T]):
         return self.collection__internal__.values()
 
 
+class ASKSEventBus(PropertyGroup):
+
+    _callbacks = {}
+    _instanced = False
+
+    def notify(self, type: str, *args: Tuple[Any, ...], **kwargs: Dict[str, Any]) -> None:
+        callbacks = self._callbacks.get(type)
+        if callbacks is not None:
+            for callback in callbacks:
+                callback(*args, **kwargs)
+
+    def subscribe(self, type: str, callback: Callable) -> None:
+        self._callbacks.setdefault(type, []).append(callback)
+
+    def unsubscribe(self, type: str, callback: Callable) -> None:
+        callbacks = self._callbacks.get(type)
+        if callbacks and callback in callbacks:
+            callbacks.remove(callback)
+
+
+
 def add_proxy_variable(driver: 'Driver', component: ASKSComponent) -> None:
     var = driver.variables.new()
     var.type = 'SINGLE_PROP'
@@ -201,6 +222,12 @@ def load_post_handler(_=None) -> None:
 def register(namespace: str):
     global _namespace
     _namespace = namespace
+    if not hasattr(bpy.types.Key, "asks"):
+        ASKSEventBus._instanced = True
+        bpy.types.Key.asks = bpy.props.PointerProperty(
+            type=ASKSEventBus,
+            options=set()
+            )
     bpy.app.handlers.load_post.append(load_post_handler)
     load_post_handler() # Ensure messages are subscribed to on first install
 
@@ -208,3 +235,7 @@ def register(namespace: str):
 def unregister():
     bpy.msgbus.clear_by_owner(MESSAGE_BROKER)
     bpy.app.handlers.load_post.remove(load_post_handler)
+    if ASKSEventBus._instanced:
+        try:
+            del bpy.types.Key.asks
+        except: pass
