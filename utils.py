@@ -43,6 +43,7 @@ def _registered_system() -> Type['System']:
         from .types.entity import Entity
         from .types.system_components import SystemComponents
         from .types.system_entities import SystemEntities
+        from .types.system import System
 
         for cls in (
                 Reference,
@@ -58,7 +59,8 @@ def _registered_system() -> Type['System']:
                 EntityComponents,
                 Entity,
                 SystemComponents,
-                SystemEntities
+                SystemEntities,
+                System
             ):
             register_class(cls)
 
@@ -70,7 +72,7 @@ def _registered_system() -> Type['System']:
             System.components__internal__[cls.asks_idname] = cls
             setattr(System, cls.SYSTEM_PATH, CollectionProperty(type=cls, options={'HIDDEN'}))
 
-        setattr(Key, "ASKS", System)
+        Key.ASKS = System
         Key.asks = PointerProperty(
             name="ASKS",
             description="Advanced shape key system",
