@@ -67,9 +67,8 @@ def _registered_system() -> Type['System']:
                 ShapeWeightComponent,
                 IDPropertyComponent,
                 ):
-            path = cls.SYSTEM_PATH
-            System.components__internal__[path] = cls
-            setattr(System, path, CollectionProperty(type=cls, options={'HIDDEN'}))
+            System.components__internal__[cls.asks_idname] = cls
+            setattr(System, cls.SYSTEM_PATH, CollectionProperty(type=cls, options={'HIDDEN'}))
 
         Key.ASKS = System
         Key.asks = PointerProperty(
@@ -108,7 +107,7 @@ def register_component(cls: Type[Component]) -> None:
 
         bpy.utils.register_class(cls)
         cls.SYSTEM_PATH = path
-        asks.components__internal__[path] = cls
+        asks.components__internal__[cls.asks_idname] = cls
         setattr(asks, path, bpy.props.CollectionProperty(type=cls, options={'HIDDEN'}))
 
 

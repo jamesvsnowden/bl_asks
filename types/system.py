@@ -1,5 +1,5 @@
 
-from typing import Callable, Dict, TYPE_CHECKING
+from typing import Callable, Dict, TYPE_CHECKING, Type
 from bpy.types import PropertyGroup
 from bpy.props import PointerProperty
 from .system_components import SystemComponents
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class System(PropertyGroup):
 
     draw_funcs__internal__: Dict[str, Callable[['UILayout', 'Entity']]] = {}
-    components__internal__: Dict[str, Component] = {}
+    components__internal__: Dict[str, Type[Component]] = {}
     processors__internal__: Dict[str, Callable] = {}
     log: Logger = None
 

@@ -1,15 +1,12 @@
 
 
-from typing import Any, Dict, Optional, Type, TypeVar, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from bpy.types import PropertyGroup
 from .system_struct import SystemStruct
 from .component import Component
 from .reference_collection import ReferenceCollection
 if TYPE_CHECKING:
     from .entity import Entity
-
-
-T = TypeVar("T", bound=Component)
 
 
 class EntityComponents(ReferenceCollection[Component], SystemStruct, PropertyGroup):
@@ -82,9 +79,3 @@ class EntityComponents(ReferenceCollection[Component], SystemStruct, PropertyGro
 
         for processor in processes:
             processor()
-
-    def create(self, type: Type[T], **properties: Dict[str, Any]) -> T:
-        name = properties.pop("name", "")
-        component = self.system.components.create(type, **properties)
-        self.attach(component, name)
-        return component

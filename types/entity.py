@@ -141,15 +141,22 @@ class Entity(SystemObject, PropertyGroup):
             fcurve = animdata.drivers.new(datapath)
         return fcurve
 
-    def __init__(self, shapekey: 'ShapeKey', **properties: Dict[str, Any]) -> None:
+    def __init__(self,
+                 data: 'ShapeKey',
+                 type: Optional[str]="",
+                 icon: Optional[int]=0,
+                 draw: Optional[Callable]=None) -> None:
+
         super().__init__()
 
-        for key, value in properties.items():
-            self[key] = value
+        self["type"] = type
+        self["icon"] = icon
+        if draw:
+            self.draw_handler = draw
 
         system = self.system
 
-        target = system.create_component(ShapeTargetComponent, value=shapekey.name)
+        target = system.create_component(ShapeTargetComponent, value=data.name)
         target.entities.collection__internal__.add().__init__(self)
         self.shape.__init__(target, "shape")
 

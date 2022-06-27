@@ -6,7 +6,6 @@ from .system_struct import SystemStruct
 from .component import Component
 from .entity import Entity
 
-T = TypeVar("T", bound=Component)
 
 class SystemComponents(SystemStruct, PropertyGroup):
 
@@ -29,15 +28,16 @@ class SystemComponents(SystemStruct, PropertyGroup):
         system = self.system
         return chain(*[getattr(system, k) for k in system.components__internal__.keys()])
 
-    def create(self, type: Type[T], **properties: Dict[str, Any]) -> T:
-        if not issubclass(type, Component):
-            raise TypeError()
+    def create(self, type: str, **properties: Dict[str, Any]) -> Component:
+        cls = self.system.components__internal__.get(type)
+        if cls is None:
+            raise KeyError()
         try:
-            collection = self.system.path_resolve(type.SYSTEM_PATH)
+            collection = self.system.path_resolve(cls.SYSTEM_PATH)
         except ValueError:
             raise TypeError()
         else:
-            component: T = collection.add()
+            component = collection.add()
             component.__init__(**properties)
             return component
 

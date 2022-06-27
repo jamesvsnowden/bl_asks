@@ -10,6 +10,7 @@ if TYPE_CHECKING:
 class ShapeWeightComponent(Component, PropertyGroup):
 
     SYSTEM_PATH = "shape_weight_components__internal__"
+    asks_idname = "asks.weight"
 
     value: FloatProperty(
         name="Value",

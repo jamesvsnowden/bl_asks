@@ -42,6 +42,8 @@ def shape_target_component_value_set(component: 'ShapeTargetComponent', value: s
 class ShapeTargetComponent(Component, PropertyGroup):
 
     SYSTEM_PATH = "shape_target_components__internal__"
+    asks_idname = "asks.shape"
+
     _owners: Dict[str, object] = {}
 
     owner__internal__: StringProperty(

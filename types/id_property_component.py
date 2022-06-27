@@ -63,6 +63,7 @@ def id_property_component_soft_max_set(component: 'IDPropertyComponent', value: 
 class IDPropertyComponent(Component, PropertyGroup):
 
     SYSTEM_PATH = "id_property_components__internal__"
+    asks_idname = "asks.idprop"
 
     @property
     def data_path(self) -> str:
