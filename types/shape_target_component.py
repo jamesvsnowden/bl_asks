@@ -3,7 +3,6 @@ from typing import Any, Dict, Optional, TYPE_CHECKING
 from uuid import uuid4
 from bpy.types import PropertyGroup
 from bpy.props import BoolProperty, StringProperty
-from bpy.msgbus import clear_by_owner, subscribe_rna
 from .component import Component
 if TYPE_CHECKING:
     from bpy.types import ShapeKey, UILayout
@@ -80,19 +79,21 @@ class ShapeTargetComponent(Component, PropertyGroup):
     def __onfileload__(self) -> None:
         shapekey = self.resolve()
         if shapekey:
+            from bpy import msgbus
             key = str(uuid4())
             obj = object()
             self._owners[key] = obj
             self.owner__internal__ = key
-            subscribe_rna(key=shapekey.path_resolve("name", False),
-                          owner=obj,
-                          notify=shapekey_name_subscriber,
-                          args=(self, shapekey),
-                          options={'PERSISTENT'})
+            msgbus.subscribe_rna(key=shapekey.path_resolve("name", False),
+                                 owner=obj,
+                                 notify=shapekey_name_subscriber,
+                                 args=(self, shapekey),
+                                 options={'PERSISTENT'})
 
     def __ondisposed__(self) -> None:
         key = self.owner__internal__
         obj = self._owners.get(key)
         if obj is not None:
+            from bpy import msgbus
             del self._owners[key]
-            clear_by_owner(obj)
+            msgbus.clear_by_owner(obj)
