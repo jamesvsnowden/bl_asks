@@ -62,9 +62,14 @@ class ShapeTargetComponent(Component, PropertyGroup):
         options=set()
         )
 
-    def draw(self, layout: 'UILayout', label: Optional[str]=None) -> None:
-        if label is None: label = self.label
-        layout.prop(self, "value", text=label, icon=self.icon)
+    def draw(self,
+             layout: 'UILayout',
+             label: Optional[str]=None,
+             icon: Optional[str]="SHAPEKEY_DATA") -> None:
+
+        if label is None:
+            label = self.label
+        layout.prop(self, "value", text=label, icon=icon)
 
     def resolve(self) -> Optional['ShapeKey']:
         return self.id_data.key_blocks.get(self.value)
