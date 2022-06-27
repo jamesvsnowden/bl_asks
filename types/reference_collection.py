@@ -19,8 +19,8 @@ class ReferenceCollection(Generic[T]):
 
     def __contains__(self, key: Union[str, T, Type[T]]) -> bool:
         if isinstance(key, str): return key in self.collection__internal__
-        if isinstance(key, T): return any(x == key for x in self)
-        if issubclass(key, T): return any(isinstance(x, key) for x in self)
+        if isinstance(key, SystemObject): return any(x == key for x in self)
+        if issubclass(key, SystemObject): return any(isinstance(x, key) for x in self)
         raise TypeError()
 
     def __iter__(self) -> Iterator[T]:
@@ -42,7 +42,7 @@ class ReferenceCollection(Generic[T]):
 
     def find(self, key: Union[str, T]) -> int:
         if isinstance(key, str): return self.collection__internal__.find(key)
-        if isinstance(key, T): return next((i for i, x in enumerate(self) if x == key), -1)
+        if isinstance(key, SystemObject): return next((i for i, x in enumerate(self) if x == key), -1)
         raise TypeError()
 
     def get(self, name: str, default: Optional[Any]=None) -> Any:
