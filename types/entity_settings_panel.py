@@ -32,5 +32,8 @@ class EntitySettingsPanel(Panel):
         return False
 
     def draw(self, context: 'Context') -> None:
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = True
         shapekey = context.object.active_shape_key
-        shapekey.id_data.asks.entities[shapekey].draw(self.layout)
+        shapekey.id_data.asks.entities[shapekey].draw(layout)
