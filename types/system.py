@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 class System(PropertyGroup):
 
-    draw_funcs__internal__: Dict[str, Callable[['UILayout', 'Entity']]] = {}
+    draw_funcs__internal__: Dict[str, Callable[['UILayout', 'Entity'], None]] = {}
     components__internal__: Dict[str, Type[Component]] = {}
     processors__internal__: Dict[str, Callable] = {}
     log: Logger = None
