@@ -25,4 +25,4 @@ class ShapeWeightComponent(Component, PropertyGroup):
 
     def draw(self, layout: 'UILayout', label: Optional[str]=None) -> None:
         text = self.label if label is None else label
-        layout.prop(self, "value", text=text, icon=self.icon)
+        layout.prop(self, "value", text=text)
