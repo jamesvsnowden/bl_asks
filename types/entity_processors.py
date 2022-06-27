@@ -41,7 +41,7 @@ class EntityProcessors(SystemStruct, PropertyGroup):
     def get(self, name: str, default: Optional[Any]=None) -> Any:
         return self.collection__internal__.get(name, default)
 
-    def items(self) -> Iterator[str, Processor]:
+    def items(self) -> Iterator[Tuple[str, Processor]]:
         return self.collection__internal__.items()
 
     def keys(self) -> Iterator[str]:
