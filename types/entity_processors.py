@@ -14,7 +14,7 @@ class EntityProcessors(SystemStruct, PropertyGroup):
         options={'HIDDEN'}
         )
 
-    def __call__(self, component: Component) -> Iterator[Processor]:
+    def __call__(self, component: 'Component') -> Iterator[Processor]:
         for processor in self.collection__internal__:
             if component in processor.arguments:
                 yield processor
@@ -49,8 +49,8 @@ class EntityProcessors(SystemStruct, PropertyGroup):
 
     def new(self,
             handler: Callable,
-            *args: Union[Tuple[Type[Component]], Tuple[Component, ...]],
-            **kwargs: Dict[str, Component]) -> Processor:
+            *args: Union[Tuple[Type['Component']], Tuple['Component', ...]],
+            **kwargs: Dict[str, 'Component']) -> Processor:
         if not callable(handler):
             raise TypeError()
         if not getattr(handler, 'ASKS_ID', ""):
