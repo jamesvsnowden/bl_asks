@@ -51,7 +51,7 @@ class Entity(SystemObject, PropertyGroup):
 
     @property
     def draw_handler(self) -> Optional[Callable[['UILayout', 'Entity'], None]]:
-        name = self.draw_handler__internal__
+        name = self.drawhandler__internal__
         if name:
             return self.system.draw_funcs__internal__.get(name)
 
@@ -62,7 +62,7 @@ class Entity(SystemObject, PropertyGroup):
         name = getattr(handler, "ASKS_ID", "")
         if not name or name not in self.system.draw_funcs__internal__:
             raise ValueError()
-        self.draw_handler__internal__ = name
+        self.drawhandler__internal__ = name
 
     icon: IntProperty(
         name="Icon",
