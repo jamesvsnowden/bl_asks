@@ -33,8 +33,8 @@ class Processor(SystemStruct, PropertyGroup):
     def __init__(self,
                  entity: 'Entity',
                  handler: Callable,
-                 *args: Union[Tuple[Type[Component]], Tuple[Component, ...]],
-                 **kwargs: Dict[str, Component]) -> None:
+                 *args: Union[Tuple[Type['Component']], Tuple['Component', ...]],
+                 **kwargs: Dict[str, 'Component']) -> None:
         self["name"] = kwargs.pop("name", "")
         self.entity.__init__(entity)
         self.handler__internal__ = handler.ASKS_ID
