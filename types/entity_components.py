@@ -24,7 +24,7 @@ class EntityComponents(ReferenceCollection[Component], SystemStruct, PropertyGro
             system.log.error(f'{component} is not a Component')
             return
 
-        if component.system != entity:
+        if component.system != system:
             system.log.error(f'{component} does not belong to the same system as {entity}')
             return
 
