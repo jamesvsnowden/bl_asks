@@ -1,5 +1,5 @@
 
-from typing import Any,Iterator, List, Optional, Union
+from typing import Any,Iterator, List, Optional, Tuple, Union
 from bpy.types import PropertyGroup
 from bpy.props import CollectionProperty
 from .system_struct import SystemStruct
@@ -35,7 +35,7 @@ class EntityOperations(SystemStruct, PropertyGroup):
     def get(self, name: str, default: Optional[Any]=None) -> Any:
         return self.collection__internal__.get(name, default)
 
-    def items(self) -> Iterator[str, EntityOperation]:
+    def items(self) -> Iterator[Tuple[str, EntityOperation]]:
         return self.collection__internal__.items()
 
     def keys(self) -> Iterator[str]:
