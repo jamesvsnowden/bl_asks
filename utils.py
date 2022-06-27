@@ -34,6 +34,7 @@ def _registered_system() -> Type['System']:
         from .types.processor_arguments import ProcessorArguments
         from .types.processor import Processor
         from .types.entity_processors import EntityProcessors
+        from .types.entity_parameters import EntityParameters
         from .types.entity_operation import EntityOperation
         from .types.entity_operations import EntityOperations
         from .types.shape_target_component import ShapeTargetComponent
@@ -51,6 +52,7 @@ def _registered_system() -> Type['System']:
                 ProcessorArguments,
                 Processor,
                 EntityProcessors,
+                EntityParameters,
                 EntityOperation,
                 EntityOperations,
                 ShapeTargetComponent,
