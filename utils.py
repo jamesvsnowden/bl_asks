@@ -70,7 +70,7 @@ def _registered_system() -> Type['System']:
             System.components__internal__[cls.asks_idname] = cls
             setattr(System, cls.SYSTEM_PATH, CollectionProperty(type=cls, options={'HIDDEN'}))
 
-        Key.ASKS = System
+        setattr(Key, "ASKS", System)
         Key.asks = PointerProperty(
             name="ASKS",
             description="Advanced shape key system",
@@ -118,7 +118,7 @@ def register_draw_handler(handler: Callable[['UILayout', 'Entity'], None]) -> No
     key = getattr(handler, "ASKS_ID", "")
     if not key:
         key = f'ASKS_{uuid4()}'
-        handler.AKS_ID = key
+        handler.ASKS_ID = key
         _registered_system().draw_funcs__internal__[key] = handler
 
 
