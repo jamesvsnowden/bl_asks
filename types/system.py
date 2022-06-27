@@ -15,7 +15,7 @@ class System(PropertyGroup):
     draw_funcs__internal__: Dict[str, Callable[['UILayout', 'Entity'], None]] = {}
     components__internal__: Dict[str, Type['Component']] = {}
     processors__internal__: Dict[str, Callable] = {}
-    log: Logger = None
+    log: 'Logger' = None
 
     components: PointerProperty(
         name="Components",
