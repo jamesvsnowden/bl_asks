@@ -1,5 +1,5 @@
 
-from typing import Any, Dict, Iterator, Type, TypeVar, Union
+from typing import Any, Dict, Iterator, Type, Union
 from itertools import chain
 from bpy.types import PropertyGroup
 from .system_struct import SystemStruct
