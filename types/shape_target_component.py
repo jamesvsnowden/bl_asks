@@ -31,7 +31,7 @@ def shape_target_component_value_get(component: 'ShapeTargetComponent') -> str:
 
 
 def shape_target_component_value_set(component: 'ShapeTargetComponent', value: str) -> None:
-    shapekey = component.id_data.key_blocks.get(component.value)
+    shapekey = component.resolve()
     if shapekey:
         shapekey.name = value
         component["value"] = shapekey.name
@@ -65,6 +65,9 @@ class ShapeTargetComponent(Component, PropertyGroup):
         if label is None: label = self.label
         layout.prop(self, "value", text=label, icon=self.icon)
 
+    def resolve(self) -> Optional['ShapeKey']:
+        return self.id_data.key_blocks.get(self.value)
+
     def __init__(self, **kwargs: Dict[str, Any]) -> None:
         super.__init__(**kwargs)
         self.disposable = True
@@ -73,16 +76,16 @@ class ShapeTargetComponent(Component, PropertyGroup):
         self.__onfileload__()
 
     def __onfileload__(self) -> None:
-        shape = self.id_data.key_blocks.get(self.value)
-        if shape:
+        shapekey = self.resolve()
+        if shapekey:
             key = str(uuid4())
             obj = object()
             self._owners[key] = obj
             self.owner__internal__ = key
-            subscribe_rna(key=shape.path_resolve("name", False),
+            subscribe_rna(key=shapekey.path_resolve("name", False),
                           owner=obj,
                           notify=shapekey_name_subscriber,
-                          args=(self, shape),
+                          args=(self, shapekey),
                           options={'PERSISTENT'})
 
     def __ondisposed__(self) -> None:
