@@ -20,7 +20,3 @@ class Reference(SystemStruct, PropertyGroup):
     def __init__(self, object: 'SystemObject', name: Optional[str]="") -> None:
         self["name"] = name
         self["path"] = object.system_path
-
-    def __init__(self, name: str, object: 'SystemObject') -> None:
-        self["name"] = name
-        self["path"] = object.system_path
