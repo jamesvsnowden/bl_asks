@@ -42,6 +42,7 @@ def _registered_system() -> Type['System']:
         from .types.id_property_component import IDPropertyComponent
         from .types.entity_components import EntityComponents
         from .types.entity import Entity
+        from .types.entity_settings_panel import EntitySettingsPanel
         from .types.system_components import SystemComponents
         from .types.system_entities import SystemEntities
         from .types.system import System
@@ -60,6 +61,7 @@ def _registered_system() -> Type['System']:
                 IDPropertyComponent,
                 EntityComponents,
                 Entity,
+                EntitySettingsPanel,
                 SystemComponents,
                 SystemEntities,
                 System

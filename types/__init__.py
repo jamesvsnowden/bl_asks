@@ -16,6 +16,7 @@ from .shape_weight_component import ShapeWeightComponent
 from .id_property_component import IDPropertyComponent
 from .entity_components import EntityComponents
 from .entity import Entity
+from .entity_settings_panel import EntitySettingsPanel
 from .system_components import SystemComponents
 from .system_entities import SystemEntities
 from .system import System

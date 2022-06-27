@@ -1,5 +1,5 @@
 
-from typing import Any, Dict, Iterator, Optional, Union
+from typing import Any, Dict, Iterator, List, Optional, Union
 from bpy.types import PropertyGroup, ShapeKey
 from bpy.props import CollectionProperty
 from .system_struct import SystemStruct
@@ -16,6 +16,15 @@ class SystemEntities(SystemStruct, PropertyGroup):
             key = key.name
         if isinstance(key, str):
             return key in self.reverselut__internal__
+        raise TypeError()
+
+    def __getitem__(self, key: Union[str, ShapeKey, int, slice]) -> Union[Entity, List[Entity]]:
+        if isinstance(key, ShapeKey):
+            key = key.name
+        if isinstance(key, str):
+            return self.reverselut__internal__[key]()
+        if isinstance(key, (int, slice)):
+            return self.collection__internal__[key]
         raise TypeError()
 
     def __iter__(self) -> Iterator['Entity']:
