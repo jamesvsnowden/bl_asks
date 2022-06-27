@@ -6,8 +6,6 @@ from .system_object import SystemObject
 from .reference import Reference
 from .entity_components import EntityComponents
 from .entity_parameters import EntityParameters
-from .id_property_component import IDPropertyComponent
-from .shape_target_component import ShapeTargetComponent
 from .entity_processors import EntityProcessors
 from .entity_subtree import EntitySubtree
 from .entity_children import EntityChildren
