@@ -156,7 +156,7 @@ class Entity(SystemObject, PropertyGroup):
 
         system = self.system
 
-        target = system.create_component(ShapeTargetComponent, value=data.name)
+        target = system.components.create("asks.shape", value=data.name)
         target.entities.collection__internal__.add().__init__(self)
         self.shape.__init__(target, "shape")
 
@@ -164,6 +164,6 @@ class Entity(SystemObject, PropertyGroup):
         kwargs = dict(min=0.0, max=1.0, soft_min=0.0, soft_max=1.0, default=1.0)
 
         for _ in range(2):
-            param = system.create_component(IDPropertyComponent, **kwargs)
+            param = system.components.create("asks.idprop", **kwargs)
             param.entities.collection__internal__.add().__init__(self)
             params.add().__init__(param)
