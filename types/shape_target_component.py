@@ -70,7 +70,7 @@ class ShapeTargetComponent(Component, PropertyGroup):
         return self.id_data.key_blocks.get(self.value)
 
     def __init__(self, **kwargs: Dict[str, Any]) -> None:
-        super.__init__(**kwargs)
+        super().__init__(**kwargs)
         self.disposable = True
         self.hide = True
         self.label = "Name"
