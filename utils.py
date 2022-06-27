@@ -34,6 +34,7 @@ def _registered_system() -> Type['System']:
         from .types.entity_operation import EntityOperation
         from .types.entity_operations import EntityOperations
         from .types.shape_target_component import ShapeTargetComponent
+        from .types.shape_weight_component import ShapeWeightComponent
         from .types.id_property_component import IDPropertyComponent
         from .types.entity_components import EntityComponents
         from .types.entity import Entity
@@ -49,6 +50,7 @@ def _registered_system() -> Type['System']:
                 EntityOperation,
                 EntityOperations,
                 ShapeTargetComponent,
+                ShapeWeightComponent,
                 IDPropertyComponent,
                 EntityComponents,
                 Entity,
@@ -59,6 +61,7 @@ def _registered_system() -> Type['System']:
 
         for cls in (
                 ShapeTargetComponent,
+                ShapeWeightComponent,
                 IDPropertyComponent,
                 ):
             path = cls.SYSTEM_PATH
