@@ -1,13 +1,16 @@
 
 from typing import Callable, Type, TYPE_CHECKING
 from uuid import uuid4
-from bpy.types import Key
+from bpy.types import Context, Key, Object
 from bpy.app.handlers import persistent
 from .types.component import Component
 if TYPE_CHECKING:
     from bpy.types import UILayout
     from .types.entity import Entity
     from .types.system import System
+
+COMPAT_ENGINES = {'BLENDER_RENDER', 'BLENDER_EEVEE', 'BLENDER_WORKBENCH'}
+COMPAT_OBJECTS = {'MESH', 'LATTICE', 'CURVE', 'SURFACE'}
 
 
 @persistent
@@ -80,6 +83,14 @@ def _registered_system() -> Type['System']:
         load_post.append(_on_file_load)
 
     return Key.ASKS
+
+
+def validate_context(context: Context) -> bool:
+    return context.engine in COMPAT_ENGINES
+
+
+def supports_shape_keys(object: Object) -> bool:
+    return object.type in COMPAT_OBJECTS
 
 
 def register_component(cls: Type[Component]) -> None:
