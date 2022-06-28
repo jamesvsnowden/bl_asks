@@ -5,7 +5,7 @@ import bpy
 from bpy.types import Operator, PropertyGroup
 from .curve_component import CurveComponent
 if TYPE_CHECKING:
-    from bpy.types import CurveMapping, ShaderNodeTree
+    from bpy.types import CurveMapping, ShaderNodeTree, ShaderNodeVectorCurve
 
 
 class CurvePointProtocol(Protocol):
@@ -151,9 +151,10 @@ class CurveMappingManager(PropertyGroup):
             tree.use_fake_user = True
         return tree
 
-    def node_get(self, name: str) -> bool:
+    def node_get(self, name: str) -> Optional['ShaderNodeVectorCurve']:
         tree = self.node_tree_get()
-        return tree is not None and tree.nodes.get(name) is not None
+        if tree is not None:
+            return tree.nodes.get(name)
 
     def node_set(self, name: str, data: CurveProtocol) -> None:
         tree = self.node_tree_get(True)

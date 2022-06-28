@@ -17,7 +17,7 @@ def range_component_min_set(component: 'RangeComponent', value: float) -> None:
 
 
 def range_component_max_get(component: 'RangeComponent') -> float:
-    component.get("max", 1.0)
+    return component.get("max", 1.0)
 
 
 def range_component_max_set(component: 'RangeComponent', value: float) -> None:
