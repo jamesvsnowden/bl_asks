@@ -381,7 +381,7 @@ class CurveComponentPoints(PropertyGroup):
             hr[1] = co[1]
 
         for index, item in enumerate(data):
-            data[index] = CurvePoint(co=item[0], handle_left=item[2], handle_right=item[3])
+            data[index] = KeyframePoint(co=item[0], handle_left=item[2], handle_right=item[3])
 
         return data
 
