@@ -47,10 +47,10 @@ class EntityProcessors(SystemStruct, PropertyGroup):
     def keys(self) -> Iterator[str]:
         return self.collection__internal__.keys()
 
-    def new(self,
-            handler: Callable,
-            *args: Union[Tuple[Type['Component']], Tuple['Component', ...]],
-            **kwargs: Dict[str, 'Component']) -> Processor:
+    def assign(self,
+               handler: Callable,
+               *args: Union[Tuple[Type['Component']], Tuple['Component', ...]],
+               **kwargs: Dict[str, 'Component']) -> Processor:
         if not callable(handler):
             raise TypeError()
         if not getattr(handler, 'ASKS_ID', ""):

@@ -1,11 +1,12 @@
 
-from typing import Callable, Type, TYPE_CHECKING
+from typing import Callable, Sequence, Type, TYPE_CHECKING
 from uuid import uuid4
 from bpy.types import Context, Key, Object
 from bpy.app.handlers import persistent
 from .types.component import Component
 if TYPE_CHECKING:
-    from bpy.types import UILayout
+    from bpy.types import FCurve, UILayout
+    from .types.curve_component import KeyframePoint
     from .types.entity import Entity
     from .types.system import System
 
@@ -114,6 +115,33 @@ def validate_context(context: Context) -> bool:
 
 def supports_shape_keys(object: Object) -> bool:
     return object.type in COMPAT_OBJECTS
+
+
+def set_keyframe_points(fcurve: 'FCurve', points: Sequence['KeyframePoint']) -> None:
+
+    frames = fcurve.keyframe_points
+    length = len(points)
+    target = len(frames)
+
+    while length > target:
+        points.remove(points[-1])
+        length -= 1
+
+    for index, frame in enumerate(frames):
+
+        if index < length:
+            point = points[index]
+        else:
+            point = points.insert(frame.co[0], frame.co[1])
+            length += 1
+
+        point.interpolation = frame.interpolation
+        point.easing = frame.easing
+        point.co = frame.co
+        point.handle_left_type = frame.handle_left_type
+        point.handle_right_type = frame.handle_right_type
+        point.handle_left = frame.handle_left
+        point.handle_right = frame.handle_right
 
 
 def register_component(cls: Type[Component]) -> None:
