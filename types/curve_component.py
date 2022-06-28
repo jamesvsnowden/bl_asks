@@ -467,17 +467,18 @@ class CurveComponent(Component, PropertyGroup):
         node = manager.node_get(self.name)
 
         outer = layout.row()
-        split = outer.split(factor=0.385)
+        split = outer.split(factor=0.38)
+        label = self.label if label is None else label
         
         row = split.row()
         row.alignment = 'RIGHT'
-        row.label(text=label, icon=f'{"BLANK1" if label else "NONE"}')
+        row.label(text=label, icon=f'{"NONE" if label else "BLANK1"}')
         
         row = split.row()
         box = row.box()
         box.context_pointer_set("curve", self)
         box.operator_context = 'INVOKE_DEFAULT'
-        row.separator()
+        row.separator(factor=2.0)
 
         if node is None:
             box.label(icon='ERROR', text="Missing Curve")
