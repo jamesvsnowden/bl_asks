@@ -26,7 +26,7 @@ class Processor(SystemStruct, PropertyGroup):
 
     @property
     def handler(self) -> Callable:
-        return self.system.handlers__internal__[self.handler__internal__]
+        return self.system.processors__internal__[self.handler__internal__]
 
     type__internal__: StringProperty(options={'HIDDEN'})
 
