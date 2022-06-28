@@ -1,6 +1,7 @@
 
 from bpy.types import PropertyGroup
 from bpy.props import PointerProperty
+from .curve_mapping_manager import CurveMappingManager
 from .system_components import SystemComponents
 from .system_entities import SystemEntities
 
@@ -14,6 +15,12 @@ class System(PropertyGroup):
     components: PointerProperty(
         name="Components",
         type=SystemComponents,
+        options=set()
+        )
+
+    curve_mapping_manager: PointerProperty(
+        name="Curve Mapping Manager",
+        type=CurveMappingManager,
         options=set()
         )
 

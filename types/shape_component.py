@@ -7,7 +7,7 @@ from .component import Component
 if TYPE_CHECKING:
     from bpy.types import ShapeKey, UILayout
 
-def shapekey_name_subscriber(component: 'ShapeTargetComponent', shapekey: 'ShapeKey') -> None:
+def shapekey_name_subscriber(component: 'ShapeComponent', shapekey: 'ShapeKey') -> None:
     system = component.system
     syskey = component.system.entities.reverselut__internal___.get(component.value)
 
@@ -25,11 +25,11 @@ def shapekey_name_subscriber(component: 'ShapeTargetComponent', shapekey: 'Shape
         finally: component["lock__internal__"] = False
 
 
-def shape_target_component_value_get(component: 'ShapeTargetComponent') -> str:
+def shape_target_component_value_get(component: 'ShapeComponent') -> str:
     return component.get("value", "")
 
 
-def shape_target_component_value_set(component: 'ShapeTargetComponent', value: str) -> None:
+def shape_target_component_value_set(component: 'ShapeComponent', value: str) -> None:
     shapekey = component.resolve()
     if shapekey:
         shapekey.name = value
@@ -38,9 +38,9 @@ def shape_target_component_value_set(component: 'ShapeTargetComponent', value: s
         component["value"] = value
 
 
-class ShapeTargetComponent(Component, PropertyGroup):
+class ShapeComponent(Component, PropertyGroup):
 
-    SYSTEM_PATH = "shape_target_components__internal__"
+    SYSTEM_PATH = "shape_components__internal__"
     asks_idname = "asks.shape"
 
     _owners: Dict[str, object] = {}

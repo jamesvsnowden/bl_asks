@@ -1,5 +1,5 @@
 
-from typing import Any, Callable, Dict, Iterator, Optional, Type, TYPE_CHECKING
+from typing import Callable, Iterator, Optional, TYPE_CHECKING
 from bpy.types import PropertyGroup
 from bpy.props import IntProperty, PointerProperty, StringProperty
 from .system_object import SystemObject

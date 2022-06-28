@@ -7,10 +7,14 @@ if TYPE_CHECKING:
     from bpy.types import UILayout
 
 
-class ShapeWeightComponent(Component, PropertyGroup):
+def value_component_value_update(component: 'ValueComponent', _) -> None:
+    component.process()
 
-    SYSTEM_PATH = "shape_weight_components__internal__"
-    asks_idname = "asks.weight"
+
+class ValueComponent(Component, PropertyGroup):
+
+    SYSTEM_PATH = "value_components__internal__"
+    asks_idname = "asks.value"
 
     value: FloatProperty(
         name="Value",
@@ -20,7 +24,7 @@ class ShapeWeightComponent(Component, PropertyGroup):
         soft_max=1.0,
         default=0.0,
         options=set(),
-        update=lambda self, _: self.process()
+        update=value_component_value_update
         )
 
     def draw(self, layout: 'UILayout', label: Optional[str]=None) -> None:

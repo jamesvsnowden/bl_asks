@@ -37,9 +37,17 @@ def _registered_system() -> Type['System']:
         from .types.entity_parameters import EntityParameters
         from .types.entity_operation import EntityOperation
         from .types.entity_operations import EntityOperations
-        from .types.shape_target_component import ShapeTargetComponent
-        from .types.shape_weight_component import ShapeWeightComponent
+        from .types.shape_component import ShapeComponent
+        from .types.value_component import ValueComponent
         from .types.id_property_component import IDPropertyComponent
+        from .types.range_component import RangeComponent
+        from .types.curve_component import (CurveComponentPoint,
+                                            CurveComponentPoints,
+                                            CurveComponent)
+        from .types.curve_mapping_manager import (ASKS_OT_curve_point_handle_type_set,
+                                                  ASKS_OT_curve_point_remove,
+                                                  ASKS_OT_curve_reload,
+                                                  CurveMappingManager)
         from .types.entity_components import EntityComponents
         from .types.entity import Entity
         from .types.entity_settings_panel import EntitySettingsPanel
@@ -56,9 +64,17 @@ def _registered_system() -> Type['System']:
                 EntityParameters,
                 EntityOperation,
                 EntityOperations,
-                ShapeTargetComponent,
-                ShapeWeightComponent,
+                ShapeComponent,
+                ValueComponent,
                 IDPropertyComponent,
+                RangeComponent,
+                CurveComponentPoint,
+                CurveComponentPoints,
+                CurveComponent,
+                ASKS_OT_curve_point_handle_type_set,
+                ASKS_OT_curve_point_remove,
+                ASKS_OT_curve_reload,
+                CurveMappingManager,
                 EntityComponents,
                 Entity,
                 EntitySettingsPanel,
@@ -69,9 +85,11 @@ def _registered_system() -> Type['System']:
             register_class(cls)
 
         for cls in (
-                ShapeTargetComponent,
-                ShapeWeightComponent,
+                ShapeComponent,
                 IDPropertyComponent,
+                ValueComponent,
+                CurveComponent,
+                RangeComponent,
                 ):
             System.components__internal__[cls.asks_idname] = cls
             setattr(System, cls.SYSTEM_PATH, CollectionProperty(type=cls, options={'HIDDEN'}))
