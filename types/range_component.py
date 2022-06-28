@@ -1,8 +1,10 @@
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from bpy.types import PropertyGroup
-from bpy.props import FloatProperty
+from bpy.props import FloatProperty, StringProperty
 from .component import Component
+if TYPE_CHECKING:
+    from bpy.types import UILayout
 
 
 def range_component_min_get(component: 'RangeComponent') -> float:
@@ -32,6 +34,16 @@ class RangeComponent(Component, PropertyGroup):
     SYSTEM_PATH = "range_components__internal__"
     asks_idname = "asks.range"
 
+    label_min: StringProperty(
+        default="Min",
+        options=set()
+        )
+
+    label_max: StringProperty(
+        default="Max",
+        options=set()
+        )
+
     min: FloatProperty(
         min=-10.0,
         max=9.999,
@@ -50,6 +62,7 @@ class RangeComponent(Component, PropertyGroup):
 
     def draw(self, layout: 'UILayout', label: Optional[str]=None) -> None:
         if label is None: label = self.label
-        col = layout.column(heading=label, align=True)
-        col.prop(self, "min", text=""),
-        col.prop(self, "max", text="")
+        col = layout.column(align=True)
+        col.prop(self, "min", text=f'{label + " " if label else ""}{self.label_min}')
+        col.prop(self, "max", text=self.label_max)
+

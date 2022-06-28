@@ -465,10 +465,19 @@ class CurveComponent(Component, PropertyGroup):
     def draw(self, layout: 'UILayout', label: Optional[str]=None) -> None:
         manager = self.system.curve_mapping_manager
         node = manager.node_get(self.name)
+
+        outer = layout.row()
+        split = outer.split(factor=0.385)
         
-        box = layout.column(heading=label or self.label).box()
+        row = split.row()
+        row.alignment = 'RIGHT'
+        row.label(text=label, icon=f'{"BLANK1" if label else "NONE"}')
+        
+        row = split.row()
+        box = row.box()
         box.context_pointer_set("curve", self)
         box.operator_context = 'INVOKE_DEFAULT'
+        row.separator()
 
         if node is None:
             box.label(icon='ERROR', text="Missing Curve")
