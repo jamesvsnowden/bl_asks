@@ -51,12 +51,19 @@ class EntityProcessors(SystemStruct, PropertyGroup):
                handler: Callable,
                *args: Union[Tuple[Type['Component']], Tuple['Component', ...]],
                **kwargs: Dict[str, 'Component']) -> Processor:
+
         if not callable(handler):
             raise TypeError()
+
         if not getattr(handler, 'ASKS_ID', ""):
             raise ValueError()
+
+        path: str = self.path_from_id()
+        entity = self.id_data.path_resolve(path.rpartition(".")[0])
+
         processor = self.collection__internal__.add()
-        processor.__init__(self, handler, *args, **kwargs)
+        processor.__init__(entity, handler, *args, **kwargs)
+
         return processor
 
     def remove(self, processor: Processor) -> None:
