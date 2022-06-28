@@ -53,7 +53,7 @@ class Processor(SystemStruct, PropertyGroup):
             for name, component in kwargs.items():
                 arguments.add().__init__(component, name)
 
-    def process(self) -> None:
+    def __call__(self) -> None:
         args = []
         kwds = {}
         for name, component in self.arguments.items():
