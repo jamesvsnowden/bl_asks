@@ -50,7 +50,7 @@ class ReferenceCollection(Generic[T]):
         return default if reference is None else reference()
 
     def items(self) -> Iterator[Tuple[str, T]]:
-        for name, reference in self.collection__internal__:
+        for name, reference in self.collection__internal__.items():
             yield name, reference()
 
     def keys(self) -> Iterator[str]:
