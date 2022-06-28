@@ -120,28 +120,28 @@ def supports_shape_keys(object: Object) -> bool:
 def set_keyframe_points(fcurve: 'FCurve', points: Sequence['KeyframePoint']) -> None:
 
     frames = fcurve.keyframe_points
-    length = len(points)
-    target = len(frames)
+    length = len(frames)
+    target = len(points)
 
     while length > target:
-        points.remove(points[-1])
+        frames.remove(frames[-1])
         length -= 1
 
-    for index, frame in enumerate(frames):
+    for index, point in enumerate(points):
 
         if index < length:
-            point = points[index]
+            frame = frames[index]
         else:
-            point = points.insert(frame.co[0], frame.co[1])
+            frame = frames.insert(point.co[0], point.co[1])
             length += 1
 
-        point.interpolation = frame.interpolation
-        point.easing = frame.easing
-        point.co = frame.co
-        point.handle_left_type = frame.handle_left_type
-        point.handle_right_type = frame.handle_right_type
-        point.handle_left = frame.handle_left
-        point.handle_right = frame.handle_right
+        frame.interpolation = point.interpolation
+        frame.easing = point.easing
+        frame.co = point.co
+        frame.handle_left_type = point.handle_left_type
+        frame.handle_right_type = point.handle_right_type
+        frame.handle_left = point.handle_left
+        frame.handle_right = point.handle_right
 
 
 def register_component(cls: Type[Component]) -> None:
