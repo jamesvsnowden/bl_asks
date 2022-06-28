@@ -12,7 +12,8 @@ from .entity_operations import EntityOperations
 from .entity_children import EntityChildren
 from .entity_subtree import EntitySubtree
 from .shape_component import ShapeComponent
-from .value_component import ShapeWeightComponent
+from .value_component import ValueComponent
+from .range_component import RangeComponent
 from .id_property_component import IDPropertyComponent
 from .entity_components import EntityComponents
 from .entity import Entity
