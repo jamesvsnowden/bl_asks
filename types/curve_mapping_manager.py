@@ -55,7 +55,7 @@ def _check_for_updates() -> None:
 
 class ASKS_OT_curve_reload(Operator):
 
-    bl_idname = "blcmap.node_ensure"
+    bl_idname = "asks.curve_reload"
     bl_label = "Ensure Curve"
     bl_description = "Ensure the curve exists"
     bl_options = {'INTERNAL'}

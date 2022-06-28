@@ -452,6 +452,7 @@ class CurveComponent(Component, PropertyGroup):
         super().__init__(**properties)
         for point in PRESETS[f'{self.interpolation}{self.easing[4:]}']:
             self.points.collection__internal__.add().__init__(point)
+        self.system.curve_mapping_manager.node_set(self.name, self)
 
     def __onfileload__(self) -> None:
         node = self.system.curve_mapping.node_get(self.name)
