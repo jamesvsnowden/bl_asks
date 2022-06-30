@@ -303,7 +303,7 @@ class namespace:
                 cls.CLASSES = tuple()
             
             with suppress(AttributeError): delattr(Key, "asks")
-            with suppress(ValueError): unregister_class(cls)
+            # with suppress(ValueError): unregister_class(cls)
 
             load_post.remove(_on_file_load)
             MESH_MT_shape_key_context_menu.remove(_draw_menu_items)
