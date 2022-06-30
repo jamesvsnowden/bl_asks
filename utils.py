@@ -113,7 +113,7 @@ def split_symmetrical(name: str) -> Tuple[str, str, str]:
 
 class namespace:
 
-    def __new__(self, cls: Type['namespace'], name: str) -> None:
+    def __new__(cls: Type['namespace'], name: str) -> None:
         if name in _namespaces:
             return _namespaces[name]
         
