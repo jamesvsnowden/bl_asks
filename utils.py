@@ -233,7 +233,7 @@ class namespace:
 
         data = {}
         name = self._name
-        menu = self._menu
+        menu = self._menu_items
 
         for key, cls in self._components.items():
             cls._users = getattr(cls, "_users", 0) + 1
