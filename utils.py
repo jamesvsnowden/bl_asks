@@ -1,6 +1,6 @@
 
 from dataclasses import dataclass
-from typing import Callable, Dict, Optional, Sequence, Tuple, Type, TYPE_CHECKING
+from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Type, TYPE_CHECKING
 from contextlib import suppress
 from uuid import uuid4
 from bpy.types import Context, Key, Object, Operator, PropertyGroup, MESH_MT_shape_key_context_menu
@@ -113,9 +113,13 @@ def split_symmetrical(name: str) -> Tuple[str, str, str]:
 
 class namespace:
 
-    def __new__(cls: Type['namespace'], name: str) -> None:
-        if name in _namespaces:
-            return _namespaces[name]
+    def __new__(cls: Type['namespace'], *args: Tuple[str], **kwargs: Dict[str, Any]) -> None:
+
+        if not len(args) or not isinstance(args[0], str):
+            raise TypeError()
+
+        if args[0] in _namespaces:
+            return _namespaces[args[0]]
         
         if not hasattr(Key, "ASKS"):
             from logging import getLogger
@@ -187,7 +191,7 @@ class namespace:
             load_post.append(_on_file_load)
             MESH_MT_shape_key_context_menu.append(_draw_menu_items)
 
-        return object.__new__(cls, name)
+        return super(namespace, cls).__new__(cls, *args, **kwargs)
 
     def __init__(self, name: str) -> None:
         self._name = name
