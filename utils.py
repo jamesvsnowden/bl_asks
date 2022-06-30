@@ -171,8 +171,8 @@ class namespace:
                 System
             )
 
-            for cls in classes:
-                register_class(cls)
+            for cls_ in classes:
+                register_class(cls_)
 
             System.CLASSES = classes
             Key.ASKS = System
