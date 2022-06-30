@@ -232,22 +232,21 @@ class namespace:
         assert self._type is None
 
         data = {}
-        asks = self._asks
         name = self._name
         menu = self._menu
 
         for key, cls in self._components.items():
             cls._users = getattr(cls, "_users", 0) + 1
             prop = f'{key}_components'
-            asks.components__internal__[f'{name}.{key}'] = prop
+            Key.ASKS.components__internal__[f'{name}.{key}'] = prop
             with suppress(ValueError): register_class(cls)
             data[prop] = CollectionProperty(type=cls, options={'HIDDEN'})
 
         for func in self._processors:
-            asks.processors__internal__[func.asks_id] = func
+            Key.ASKS.processors__internal__[func.asks_id] = func
 
         for func in self._draw_funcs:
-            asks.draw_funcs__internal__[func.asks_id] = func
+            Key.ASKS.draw_funcs__internal__[func.asks_id] = func
 
         if menu:
             items = []
@@ -262,22 +261,21 @@ class namespace:
         setattr(Key, name, cls)
 
     def unregister(self) -> None:
-        asks = self._asks
         name = self._name
         menu = self._menu_items
 
         for key, cls in self._components.items():
             prop = f'{key}_components'
-            with suppress(KeyError): del asks.components__internal__[prop]
+            with suppress(KeyError): del Key.ASKS.components__internal__[prop]
             count = cls._users = getattr(cls, "_users", 1) - 1
             if count <= 0:
                 with suppress(ValueError): unregister_class(cls)
 
         for func in self._processors:
-            with suppress(KeyError): del asks.processors__internal__[func.asks_id]
+            with suppress(KeyError): del Key.ASKS.processors__internal__[func.asks_id]
 
         for func in self._draw_funcs:
-            with suppress(KeyError): del asks.draw_funcs__internal__[func.asks_id]
+            with suppress(KeyError): del Key.ASKS.draw_funcs__internal__[func.asks_id]
 
         with suppress(KeyError): del _menu_items[name]
         for _, cls in menu:
