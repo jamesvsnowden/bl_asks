@@ -50,7 +50,7 @@ def _draw_menu_items(menu: 'Menu', context:Context) -> None:
     for group in _menu_items.values():
         layout.separator()
         for item in group:
-            layout.operator(item.id, text=item.label, icon=item.icon)
+            layout.operator(item.id, text=item.text, icon=item.icon)
 
 
 def validate_context(context: Context) -> bool:
