@@ -10,7 +10,6 @@ from .entity_parameters import EntityParameters
 from .entity_processors import EntityProcessors
 from .entity_subtree import EntitySubtree
 from .entity_children import EntityChildren
-from .tags import Tags
 from .entity_draw_controller import EntityDrawController
 if TYPE_CHECKING:
     from bpy.types import Driver, FCurve, ShapeKey
@@ -89,12 +88,6 @@ class Entity(SystemObject, PropertyGroup):
         options=set()
         )
 
-    tags: PointerProperty(
-        name="Tags",
-        type=Tags,
-        options=set()
-        )
-
     type: StringProperty(
         name="Type",
         get=lambda self: self.get("type", ""),
@@ -125,8 +118,7 @@ class Entity(SystemObject, PropertyGroup):
                  data: 'ShapeKey',
                  type: Optional[str]='NONE',
                  icon: Optional[int]=0,
-                 draw: Optional[Callable]=None,
-                 tags: Optional[Set[str]]=None) -> None:
+                 draw: Optional[Callable]=None) -> None:
 
         self["name"] = f'ASKS_{uuid4()}'
         self["path"] = f'asks.entities.collection__internal__["{self.name}"]'
@@ -134,10 +126,8 @@ class Entity(SystemObject, PropertyGroup):
         self["icon"] = icon
     
         self.draw.entity__internal__ = self.name
-        if draw: self.draw.handler = draw
-        if tags:
-            for tag in tags:
-                self.tags.collection__internal__.add()["name"] = tag
+        if draw:
+            self.draw.handler = draw
 
         system = self.system
         target = system.components.create("asks.shape", value=data.name)

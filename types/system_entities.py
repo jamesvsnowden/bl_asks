@@ -44,7 +44,7 @@ class SystemEntities(SystemStruct, PropertyGroup):
             return default if ref is None else ref() or default
         raise TypeError()
 
-    def new(self, shapekey: ShapeKey, **properties: Dict[str, Any]) -> Entity:
+    def create(self, shapekey: ShapeKey, **properties: Dict[str, Any]) -> Entity:
         if not isinstance(shapekey, ShapeKey):
             raise TypeError()
         if shapekey.id_data != self.id_data:
@@ -56,5 +56,5 @@ class SystemEntities(SystemStruct, PropertyGroup):
         self.reverselut__internal__.add().__init__(entity, name=shapekey.name)
         return entity
 
-    def remove(self, entity: Entity) -> None:
+    def delete(self, entity: Entity) -> None:
         pass
