@@ -45,7 +45,7 @@ def _check_for_updates() -> None:
     for curve in _editing:
         tree = CurveMappingManager.node_tree_get()
         if tree is not None:
-            node = tree.nodes.get(curve.node_identifier)
+            node = tree.nodes.get(curve.name)
             if node is not None:
                 mapping = node.mapping
                 if _differ(curve, mapping):

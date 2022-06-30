@@ -1,7 +1,7 @@
 
-from typing import Optional, TYPE_CHECKING
+from typing import Iterable, Optional, TYPE_CHECKING, Set
 from bpy.types import PropertyGroup
-from bpy.props import StringProperty
+from bpy.props import CollectionProperty, StringProperty
 from .system_struct import SystemStruct
 if TYPE_CHECKING:
     from .system_object import SystemObject
@@ -14,9 +14,25 @@ class Reference(SystemStruct, PropertyGroup):
         options={'HIDDEN'}
         )
 
-    def __call__(self) -> 'SystemObject':
-        return self.system.path_resolve(self.path)
+    tags__internal__: CollectionProperty(
+        name="Tags",
+        type=PropertyGroup,
+        options={'HIDDEN'}
+        )
 
-    def __init__(self, object: 'SystemObject', name: Optional[str]="") -> None:
+    @property
+    def tags(self) -> Set[str]:
+        return set(self.tags__internal__)
+
+    def __call__(self) -> 'SystemObject':
+        return self.id_data.path_resolve(self.path)
+
+    def __init__(self,
+                 data: 'SystemObject',
+                 name: Optional[str]="",
+                 tags: Optional[Iterable[str]]=None) -> None:
         self["name"] = name
-        self["path"] = object.system_path
+        self["path"] = data.path
+        if tags:
+            for tag in set(tags):
+                self.tags__internal__.add()["name"] = tag

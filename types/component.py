@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional, TYPE_CHECKING
 from bpy.props import BoolProperty, PointerProperty, StringProperty
 from .system_object import SystemObject
 from .component_entities import ComponentEntities
+from .component_tags import ComponentTags
 if TYPE_CHECKING:
     from bpy.types import UILayout
     from .entity import Entity
@@ -32,6 +33,12 @@ class Component(SystemObject):
         options=set()
         )
 
+    tags: PointerProperty(
+        name="Tags",
+        type=ComponentTags,
+        options=set()
+        )
+
     def draw(self, layout: 'UILayout', label: Optional[str]=None) -> None:
         pass
 
@@ -41,7 +48,6 @@ class Component(SystemObject):
                 process()
 
     def __init__(self, **properties: Dict[str, Any]) -> None:
-        super().__init__()
         for key, value in properties.items():
             self[key] = value
 
@@ -58,4 +64,4 @@ class Component(SystemObject):
         pass
 
     def __str__(self) -> str:
-        return f'{self.__class__.__name__}@{self.system_path}'
+        return f'{self.__class__.__name__}@{self.path}'

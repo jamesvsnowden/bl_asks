@@ -1,5 +1,6 @@
 
-from typing import Callable, Iterator, Optional, TYPE_CHECKING
+from typing import Callable, Iterator, Optional, TYPE_CHECKING, Set
+from uuid import uuid4
 from bpy.types import PropertyGroup
 from bpy.props import IntProperty, PointerProperty, StringProperty
 from .system_object import SystemObject
@@ -9,14 +10,13 @@ from .entity_parameters import EntityParameters
 from .entity_processors import EntityProcessors
 from .entity_subtree import EntitySubtree
 from .entity_children import EntityChildren
+from .tags import Tags
+from .entity_draw_controller import EntityDrawController
 if TYPE_CHECKING:
-    from bpy.types import Driver, FCurve, ShapeKey, UILayout
-    from .component import Component
+    from bpy.types import Driver, FCurve, ShapeKey
 
 
 class Entity(SystemObject, PropertyGroup):
-
-    SYSTEM_PATH = "entities.collection__internal__"
 
     @property
     def ancestors(self) -> Iterator['Entity']:
@@ -44,25 +44,11 @@ class Entity(SystemObject, PropertyGroup):
         next(subtree)
         yield from subtree
 
-    drawhandler__internal__: StringProperty(
-        default="",
-        options={'HIDDEN'}
+    draw: PointerProperty(
+        name="Draw",
+        type=EntityDrawController,
+        options=set()
         )
-
-    @property
-    def draw_handler(self) -> Optional[Callable[['UILayout', 'Entity'], None]]:
-        name = self.drawhandler__internal__
-        if name:
-            return self.system.draw_funcs__internal__.get(name)
-
-    @draw_handler.setter
-    def draw_handler(self, handler: Callable[['UILayout', 'Entity'], None]):
-        if not callable(handler):
-            raise TypeError()
-        name = getattr(handler, "ASKS_ID", "")
-        if not name or name not in self.system.draw_funcs__internal__:
-            raise ValueError()
-        self.drawhandler__internal__ = name
 
     icon: IntProperty(
         name="Icon",
@@ -74,12 +60,6 @@ class Entity(SystemObject, PropertyGroup):
         name="Index",
         get=lambda self: self.get("index", 0),
         options={'HIDDEN'}
-        )
-
-    tag: StringProperty(
-        name="Tag",
-        default="",
-        options=set()
         )
 
     parameters: PointerProperty(
@@ -109,19 +89,21 @@ class Entity(SystemObject, PropertyGroup):
         options=set()
         )
 
+    tags: PointerProperty(
+        name="Tags",
+        type=Tags,
+        options=set()
+        )
+
+    type: StringProperty(
+        name="Type",
+        get=lambda self: self.get("type", ""),
+        options=set()
+        )
+
     @property
     def subtree(self) -> EntitySubtree:
         return EntitySubtree(self)
-
-    def draw(self, layout: 'UILayout') -> None:
-        handler = self.draw_handler
-        if handler:
-            handler(layout, self)
-        else:
-            component: 'Component'
-            for component in self.components:
-                if not component.hide:
-                    component.draw(layout, self)
 
     def driver(self, ensure: Optional[bool]=True) -> Optional['Driver']:
         fcurve = self.fcurve(ensure)
@@ -141,19 +123,23 @@ class Entity(SystemObject, PropertyGroup):
 
     def __init__(self,
                  data: 'ShapeKey',
-                 type: Optional[str]="",
+                 type: Optional[str]='NONE',
                  icon: Optional[int]=0,
-                 draw: Optional[Callable]=None) -> None:
+                 draw: Optional[Callable]=None,
+                 tags: Optional[Set[str]]=None) -> None:
 
-        super().__init__()
-
+        self["name"] = f'ASKS_{uuid4()}'
+        self["path"] = f'asks.entities.collection__internal__["{self.name}"]'
         self["type"] = type
         self["icon"] = icon
-        if draw:
-            self.draw_handler = draw
+    
+        self.draw.entity__internal__ = self.name
+        if draw: self.draw.handler = draw
+        if tags:
+            for tag in tags:
+                self.tags.collection__internal__.add()["name"] = tag
 
         system = self.system
-
         target = system.components.create("asks.shape", value=data.name)
         target.entities.collection__internal__.add().__init__(self)
         self.shape.__init__(target, "shape")

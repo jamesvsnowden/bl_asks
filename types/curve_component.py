@@ -398,9 +398,6 @@ def curve_component_preset_update(component: 'CurveComponent', _) -> None:
 
 class CurveComponent(Component, PropertyGroup):
 
-    SYSTEM_PATH = "curve_components__internal__"
-    asks_idname = "asks.curve"
-
     easing: EnumProperty(
         name="Easing",
         items=[
@@ -435,7 +432,7 @@ class CurveComponent(Component, PropertyGroup):
             ('QUART' , "Quartic"     , "Quartic"         , 'IPO_QUART' , 4),
             ('QUINT' , "Quintic"     , "Quintic"         , 'IPO_QUINT' , 5),
             None,
-            ('CUSTOM', "Custom Curve", "Use custom curve", 'FCURVE'    , 6),
+            ('CUSTOM', "Custom"      , "Use custom curve", 'FCURVE'    , 6),
             ],
         default='LINEAR',
         options=set(),
@@ -467,7 +464,7 @@ class CurveComponent(Component, PropertyGroup):
         node = manager.node_get(self.name)
 
         outer = layout.row()
-        split = outer.split(factor=0.38)
+        split = outer.split(factor=0.385)
         label = self.label if label is None else label
         
         row = split.row()
@@ -488,7 +485,7 @@ class CurveComponent(Component, PropertyGroup):
         row = box.row()
         row.ui_units_y = 0.01
 
-        split = row.split(factor=0.5)
+        split = row.split(factor=0.6)
         row_l = split.row(align=True)
         row_r = split.row(align=True)
 

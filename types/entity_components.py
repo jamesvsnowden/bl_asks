@@ -1,11 +1,13 @@
 
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Set
 from bpy.types import PropertyGroup
 from .system_struct import SystemStruct
 from .component import Component
 from .reference_collection import ReferenceCollection
 if TYPE_CHECKING:
+    from .processor_arguments import ProcessorArguments
+    from .processor import Processor
     from .entity import Entity
 
 
@@ -16,31 +18,34 @@ class EntityComponents(ReferenceCollection[Component], SystemStruct, PropertyGro
         path: str = self.path_from_id()
         return self.id_data.path_resolve(path.rpartition(".")[0])
 
-    def attach(self, component: Component, name: Optional[str]="") -> None:
+    def attach(self, component: Component, name: Optional[str]="", tags: Optional[Set[str]]=None) -> None:
+
+        if not isinstance(component, Component):
+            raise TypeError((f'{self.__class__.__name__}.attach(component, name="", tags=None): '
+                             f'Expected component to be Component, '
+                             f'not {component.__class__.__name__}'))
+
         system = self.system
         entity = self.entity
 
-        if not isinstance(component, Component):
-            system.log.error(f'{component} is not a Component')
-            return
-
         if component.system != system:
-            system.log.error(f'{component} does not belong to the same system as {entity}')
-            return
+            raise ValueError((f'{self.__class__.__name__}.attach(component, name="", tags=None): '
+                              f'{component} does not belong to the same system as {entity}'))
 
         if component in entity.components:
-            system.log.warning(f'{component} is already attached to {entity}')
-            return
+            raise ValueError((f'{self.__class__.__name__}.attach(component, name="", tags=None): '
+                              f'{component} is already attached to {entity}'))
 
-        entity.components.collection__internal__.add().__init__(component, name)
-        component.entities.collection__internal__.add().__init__(entity)
+        entity.components.collection__internal__.add().__init__(component, name=name, tags=tags)
+        component.entities.collection__internal__.add().__init__(entity, tags=tags)
 
-        key = component.SYSTEM_PATH
         processes = []
-        for processor in entity.processors:
-            if processor.type__internal__ == key:
-                processor.arguments.collection__internal__.add().__init__(component)
-                processes.append(processor)
+        if tags:
+            for processor in entity.processors:
+                proc_tags = processor.tags
+                if proc_tags and proc_tags.issubset(tags):
+                    processor.arguments.collection__internal__.add().__init__(component)
+                    processes.append(processor)
 
         component.__onattached__(entity)
 
@@ -48,29 +53,40 @@ class EntityComponents(ReferenceCollection[Component], SystemStruct, PropertyGro
             processor()
 
     def detach(self, component: Component) -> None:
+        
+        if not isinstance(component, Component):
+            raise TypeError((f'{self.__class__.__name__}.detach(component): '
+                             f'Expected component to be Component, '
+                             f'not {component.__class__.__name__}'))
+
         system = self.system
         entity = self.entity
+        cindex = self.find(component)
 
-        index = entity.components.find(component)
-        
-        if index == -1:
-            system.log.warning(f'{component} is not attached to {entity}')
-            return
+        if cindex == -1:
+            raise ValueError((f'{self.__class__.__name__}.detach(component): '
+                              f'{component} is not a component of {entity}'))
 
         processes = []
+        tags = component.tags
+        if tags:
+            processor: 'Processor'
+            arguments: 'ProcessorArguments'
 
-        for processor in entity.processors:
-            index = processor.arguments.find(component)
-            if index != -1:
-                processor.arguments.collection__internal__.remove(index)
-                if component.SYSTEM_PATH == processor.type__internal__:
-                    processes.append(processor)
+            for processor in entity.processors:
+                proc_tags = processor.tags
+                if proc_tags and proc_tags.issubset(tags):
+                    arguments = processor.arguments
+                    arg_index = arguments.find(component)
+                    if arg_index != -1:
+                        arguments.collection__internal__.remove(arg_index)
+                        processes.append(processor)
 
-        entity.components.components__internal__.remove(index)
+        entity.components.components__internal__.remove(cindex)
 
-        index = component.entities.find(entity)
-        if index != -1:
-            component.entities.collection__internal__.remove(index)
+        eindex = component.entities.find(entity)
+        if eindex != -1:
+            component.entities.collection__internal__.remove(eindex)
 
         component.__ondetached__(entity)
 
