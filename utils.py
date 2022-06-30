@@ -1,6 +1,6 @@
 
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Optional, Sequence, Tuple, Type, TYPE_CHECKING
+from typing import Callable, Optional, Sequence, Tuple, Type, TYPE_CHECKING
 from contextlib import suppress
 from uuid import uuid4
 from bpy.types import Context, Key, Object, Operator, PropertyGroup, MESH_MT_shape_key_context_menu
@@ -9,13 +9,11 @@ from bpy.utils import register_class, unregister_class
 from bpy.app.handlers import load_post, persistent
 from .types.component import Component
 if TYPE_CHECKING:
-    from bpy.types import FCurve, Menu, UILayout
+    from bpy.types import FCurve, Menu
     from .types.curve_component import KeyframePoint
-    from .types.entity import Entity
-    from .types.system import System
 
 _namespaces = {}
-_menu_items = []
+_menu_items = {}
 COMPAT_ENGINES = {'BLENDER_RENDER', 'BLENDER_EEVEE', 'BLENDER_WORKBENCH'}
 COMPAT_OBJECTS = {'MESH', 'LATTICE', 'CURVE', 'SURFACE'}
 SYM_AFIX_SEPRS = (".", " ", "-", "_")
