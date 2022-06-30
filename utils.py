@@ -113,13 +113,13 @@ def split_symmetrical(name: str) -> Tuple[str, str, str]:
 
 class namespace:
 
-    def __new__(cls: Type['namespace'], *args: Tuple[str], **kwargs: Dict[str, Any]) -> None:
+    def __new__(cls: Type['namespace'], name: str) -> None:
 
-        if not len(args) or not isinstance(args[0], str):
+        if not isinstance(name, str):
             raise TypeError()
 
-        if args[0] in _namespaces:
-            return _namespaces[args[0]]
+        if name in _namespaces:
+            return _namespaces[name]
         
         if not hasattr(Key, "ASKS"):
             from logging import getLogger
@@ -191,7 +191,7 @@ class namespace:
             load_post.append(_on_file_load)
             MESH_MT_shape_key_context_menu.append(_draw_menu_items)
 
-        return super(namespace, cls).__new__(cls, *args, **kwargs)
+        return super(namespace, cls).__new__(cls)
 
     def __init__(self, name: str) -> None:
         self._name = name
