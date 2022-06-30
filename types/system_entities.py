@@ -34,7 +34,7 @@ class SystemEntities(SystemStruct, PropertyGroup):
         return len(self.collection__internal__)
 
     def ensure(self, shapekey: ShapeKey) -> Entity:
-        return self.get(shapekey) or self.new(shapekey)
+        return self.get(shapekey) or self.create(shapekey)
 
     def get(self, key: Union[str, ShapeKey], default: Optional[Any]=None) -> Any:
         if isinstance(key, ShapeKey):
