@@ -9,6 +9,7 @@ from .processor import Processor
 from .entity_processors import EntityProcessors
 from .entity_operation import EntityOperation
 from .entity_operations import EntityOperations
+from .entity_draw_controller import EntityDrawController
 from .entity_children import EntityChildren
 from .entity_subtree import EntitySubtree
 from .shape_component import ShapeComponent

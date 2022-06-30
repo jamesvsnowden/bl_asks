@@ -127,6 +127,7 @@ class namespace:
             from .types.entity_parameters import EntityParameters
             from .types.entity_operation import EntityOperation
             from .types.entity_operations import EntityOperations
+            from .types.entity_draw_controller import EntityDrawController
             from .types.shape_component import ShapeComponent
             from .types.id_property_component import IDPropertyComponent
             from .types.curve_component import (CurveComponentPoint,
@@ -152,6 +153,7 @@ class namespace:
                 EntityParameters,
                 EntityOperation,
                 EntityOperations,
+                EntityDrawController,
                 ShapeComponent,
                 IDPropertyComponent,
                 CurveComponentPoint,
