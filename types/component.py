@@ -3,7 +3,6 @@ from typing import Any, Dict, Optional, TYPE_CHECKING
 from bpy.props import BoolProperty, PointerProperty, StringProperty
 from .system_object import SystemObject
 from .component_entities import ComponentEntities
-from .component_tags import ComponentTags
 if TYPE_CHECKING:
     from bpy.types import UILayout
     from .entity import Entity
@@ -30,12 +29,6 @@ class Component(SystemObject):
     label: StringProperty(
         name="Label",
         default="",
-        options=set()
-        )
-
-    tags: PointerProperty(
-        name="Tags",
-        type=ComponentTags,
         options=set()
         )
 
