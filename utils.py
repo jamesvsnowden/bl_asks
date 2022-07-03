@@ -126,7 +126,6 @@ class namespace:
             from .types.processor_arguments import ProcessorArguments
             from .types.processor import Processor
             from .types.entity_processors import EntityProcessors
-            from .types.entity_parameters import EntityParameters
             from .types.entity_operation import EntityOperation
             from .types.entity_operations import EntityOperations
             from .types.entity_draw_controller import EntityDrawController
@@ -152,7 +151,6 @@ class namespace:
                 ProcessorArguments,
                 Processor,
                 EntityProcessors,
-                EntityParameters,
                 EntityOperation,
                 EntityOperations,
                 EntityDrawController,
