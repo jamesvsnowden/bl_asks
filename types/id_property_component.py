@@ -62,9 +62,6 @@ def id_property_component_soft_max_set(component: 'IDPropertyComponent', value: 
 
 class IDPropertyComponent(Component, PropertyGroup):
 
-    SYSTEM_PATH = "id_property_components__internal__"
-    asks_idname = "asks.idprop"
-
     @property
     def data_path(self) -> str:
         return f'["{self.name}"]'
@@ -113,7 +110,11 @@ class IDPropertyComponent(Component, PropertyGroup):
 
     def __init__(self, **properties: Dict[str, Any]) -> None:
         super().__init__(**properties)
-        rna_idprop_ui_create(self.id_data, self.name, **properties)
+        settings = {}
+        for key in ("min", "max", "soft_min", "soft_max", "default", "description"):
+            if key in properties:
+                settings[key] = properties[key]
+        rna_idprop_ui_create(self.id_data, self.name, **settings)
 
     def as_dict(self) -> Dict[str, Any]:
         return self.id_data.id_properties_ui(self.name).as_dict()
