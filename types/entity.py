@@ -4,9 +4,9 @@ from uuid import uuid4
 from bpy.types import PropertyGroup
 from bpy.props import IntProperty, PointerProperty, StringProperty
 from .system_object import SystemObject
-from .reference import Reference
+from .shape_component import ShapeComponent
+from .id_property_component import IDPropertyComponent
 from .entity_components import EntityComponents
-from .entity_parameters import EntityParameters
 from .entity_processors import EntityProcessors
 from .entity_subtree import EntitySubtree
 from .entity_children import EntityChildren
@@ -61,9 +61,9 @@ class Entity(SystemObject, PropertyGroup):
         options={'HIDDEN'}
         )
 
-    parameters: PointerProperty(
-        name="Parameters",
-        type=EntityParameters,
+    influence: PointerProperty(
+        name="Influence",
+        type=IDPropertyComponent,
         options=set()
         )
 
@@ -82,9 +82,15 @@ class Entity(SystemObject, PropertyGroup):
         options=set()
         )
 
+    weight: PointerProperty(
+        name="Weight",
+        type=IDPropertyComponent,
+        options=set()
+        )
+
     shape: PointerProperty(
         name="Shape",
-        type=Reference,
+        type=ShapeComponent,
         options=set()
         )
 
@@ -129,15 +135,26 @@ class Entity(SystemObject, PropertyGroup):
         if draw:
             self.draw.handler = draw
 
-        system = self.system
-        target = system.components.create("asks.shape", value=data.name)
-        target.entities.collection__internal__.add().__init__(self)
-        self.shape.__init__(target, "shape")
+        self.shape.__init__(
+            name=f'ASKS_{uuid4()}',
+            path=f'{self.path}.shape',
+            value=data.name
+            )
 
-        params = self.parameters.collection__internal__
-        kwargs = dict(min=0.0, max=1.0, soft_min=0.0, soft_max=1.0, default=1.0)
+        self.influence.__init__(
+            name=f'ASKS_{uuid4()}',
+            min=0.0,
+            max=1.0,
+            soft_min=0.0,
+            soft_max=1.0,
+            default=1.0
+            )
 
-        for _ in range(2):
-            param = system.components.create("asks.idprop", **kwargs)
-            param.entities.collection__internal__.add().__init__(self)
-            params.add().__init__(param)
+        self.weight.__init__(
+            name=f'ASKS_{uuid4()}',
+            min=0.0,
+            max=1.0,
+            soft_min=0.0,
+            soft_max=1.0,
+            default=1.0
+            )
