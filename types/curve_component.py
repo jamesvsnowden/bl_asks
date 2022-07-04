@@ -387,18 +387,18 @@ class CurveComponentPoints(PropertyGroup):
         return data
 
 
+def curve_component_preset_get(component: 'CurveComponent') -> Sequence[CurvePoint]:
+    ipo = component.interpolation
+    return PRESETS[ipo] if ipo == 'LINEAR' else PRESETS[f'{ipo}{component.easing[4:]}']
+
+
 def curve_component_extend_update(component: 'CurveComponent', _) -> None:
     component.process()
 
 
 def curve_component_preset_update(component: 'CurveComponent', _) -> None:
     if component.interpolation != 'CUSTOM':
-        ipo = component.interpolation
-        if ipo == 'LINEAR':
-            pts = PRESETS['LINEAR']
-        else:
-            pts = PRESETS[f'{ipo}{component.easing[4:]}']
-        component.update(pts, component.extend)
+        component.update(curve_component_preset_get(component), component.extend)
 
 
 class CurveComponent(Component, PropertyGroup):
@@ -452,7 +452,7 @@ class CurveComponent(Component, PropertyGroup):
 
     def __init__(self, **properties: Dict[str, Any]) -> None:
         super().__init__(**properties)
-        for point in PRESETS[f'{self.interpolation}{self.easing[4:]}']:
+        for point in curve_component_preset_get(self):
             self.points.collection__internal__.add().__init__(point)
         self.system.curve_mapping_manager.node_set(self.name, self)
 
