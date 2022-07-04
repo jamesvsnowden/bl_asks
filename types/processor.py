@@ -41,7 +41,7 @@ class Processor(SystemStruct, PropertyGroup):
                  **kwargs: Dict[str, Union[str, 'Component']]) -> None:
         self["name"] = kwargs.pop("name", "")
         self.entity.__init__(entity)
-        self.handler__internal__ = handler.ASKS_ID
+        self.handler__internal__ = handler.asks_id
 
         arguments = self.arguments.collection__internal__
 

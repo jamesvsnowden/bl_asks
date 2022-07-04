@@ -55,7 +55,7 @@ class EntityProcessors(SystemStruct, PropertyGroup):
         if not callable(handler):
             raise TypeError()
 
-        if not getattr(handler, 'ASKS_ID', ""):
+        if not getattr(handler, 'asks_id', ""):
             raise ValueError()
 
         path: str = self.path_from_id()

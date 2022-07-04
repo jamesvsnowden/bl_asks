@@ -30,7 +30,7 @@ class EntityDrawController(SystemStruct, PropertyGroup):
 
     def __eq__(self, handler: DrawHandler) -> bool:
         handle = self.handle__internal__
-        return bool(handle) and handle == getattr(handler, 'ASKS_ID', "")
+        return bool(handle) and handle == getattr(handler, 'asks_id', "")
 
     @property
     def handler(self) -> Optional[DrawHandler]:
@@ -38,8 +38,8 @@ class EntityDrawController(SystemStruct, PropertyGroup):
 
     @handler.setter
     def handler(self, handler: DrawHandler) -> None:
-        handle = getattr(handler, "ASKS_ID", "")
+        handle = getattr(handler, "asks_id", "")
         if not handle or handle not in self.system.draw_funcs__internal__:
             raise ValueError()
-        self.handle__internal__ == handle
+        self.handle__internal__ = handle
 
