@@ -121,7 +121,7 @@ class IDPropertyComponent(Component, PropertyGroup):
 
     def draw(self, layout: 'UILayout', label: Optional[str]=None) -> None:
         text = self.label if label is None else label
-        layout.prop(self.id_data, self.property_path, text=text, icon=self.icon)
+        layout.prop(self.id_data, self.data_path, text=text, icon=self.icon)
 
     def update(self,
                value: Optional[Union[float, Sequence[float]]]=None,
