@@ -531,7 +531,6 @@ class CurveComponent(Component, PropertyGroup):
         col.separator(factor=0.3)
 
     def process(self) -> None:
-        print("processing")
         self.system.curve_mapping_manager.node_set(self.name, self)
         super().process()
 
@@ -539,23 +538,37 @@ class CurveComponent(Component, PropertyGroup):
                points: Optional[Sequence[CurvePointProtocol]]=None,
                extend: Optional[str]="") -> None:
 
-        print("updating")
+        print('a')
 
         if points:
+            print('b')
             items = self.points.collection__internal__
             count = len(points)
+            print('c')
             while len(items) > count: items.remove(-1)
+            print('d')
             while len(items) < count: items.add()
+            print('e')
             for item, point in zip(items, points): item.__init__(point)
+            print('f')
 
         if extend:
             self["extend"] = extend
 
+        print('g')
+
         points = list(self.points)
+        print('h')
         ptsort = sorted(points, key=point_location_x)
+        print('i')
 
         if points != ptsort:
+            print('j')
             ptsort = [CurvePoint(pt.location, pt.handle_type, pt.select) for pt in ptsort]
+            print('k')
             for point, data in zip(points, ptsort): point.__init__(data)
+            print('l')
+
+        print('m')
 
         self.process()
