@@ -14,8 +14,8 @@ if TYPE_CHECKING:
 
 
 class CurvePointProtocol(Protocol):
-    handle_type: str
     location: Tuple[float, float]
+    handle_type: str
     select: bool
 
 
@@ -38,9 +38,10 @@ class CurvePoint:
 
 
 PRESETS: Dict[str, Sequence[CurvePoint]] = {}
-PRESETS['LINEAR'] = PRESETS['LINEAR_IN'] = PRESETS['LINEAR_OUT'] = PRESETS['LINEAR_IN_OUT'] = (
+
+PRESETS['LINEAR'] = (
     CurvePoint((0.0, 0.0), 'VECTOR'),
-    CurvePoint((1.0, 1.0), 'VECTOR')
+    CurvePoint((1.0, 1.0), 'VECTOR'),
     )
 PRESETS['SINE_IN'] = (
     CurvePoint((0.0, 0.0) , 'AUTO'),
@@ -392,8 +393,12 @@ def curve_component_extend_update(component: 'CurveComponent', _) -> None:
 
 def curve_component_preset_update(component: 'CurveComponent', _) -> None:
     if component.interpolation != 'CUSTOM':
-        points = PRESETS[f'{component.interpolation}{component.easing[4:]}']
-        component.update(points, component.extend)
+        ipo = component.interpolation
+        if ipo == 'LINEAR':
+            pts = PRESETS['LINEAR']
+        else:
+            pts = PRESETS[f'{ipo}{component.easing[4:]}']
+        component.update(pts, component.extend)
 
 
 class CurveComponent(Component, PropertyGroup):
@@ -526,12 +531,15 @@ class CurveComponent(Component, PropertyGroup):
         col.separator(factor=0.3)
 
     def process(self) -> None:
+        print("processing")
         self.system.curve_mapping_manager.node_set(self.name, self)
         super().process()
 
     def update(self,
                points: Optional[Sequence[CurvePointProtocol]]=None,
                extend: Optional[str]="") -> None:
+
+        print("updating")
 
         if points:
             items = self.points.collection__internal__
