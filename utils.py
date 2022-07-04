@@ -233,10 +233,9 @@ class namespace:
 
         for key, cls in self._components.items():
             cls._users = getattr(cls, "_users", 0) + 1
-            prop = f'{key}_components'
-            Key.ASKS.components__internal__[f'{name}.{key}'] = prop
+            Key.ASKS.components__internal__[f'{name}.{key}'] = f'{name}.{key}_components'
             with suppress(ValueError): register_class(cls)
-            data[prop] = CollectionProperty(type=cls, options={'HIDDEN'})
+            data[f'{key}_components'] = CollectionProperty(type=cls, options={'HIDDEN'})
 
         for func in self._processors:
             Key.ASKS.processors__internal__[func.asks_id] = func
