@@ -254,7 +254,7 @@ class namespace:
 
         cls = self._type = type(name, (PropertyGroup,), {"__annotations__": data})
         register_class(cls)
-        setattr(Key, name, cls)
+        setattr(Key, name, PointerProperty(type=cls, options={'HIDDEN'}))
 
     def unregister(self) -> None:
         name = self._name
@@ -281,8 +281,8 @@ class namespace:
 
         cls = self._type
         if cls:
-            with suppress(ValueError): unregister_class(cls)
             with suppress(AttributeError): delattr(Key, name)
+            with suppress(ValueError): unregister_class(cls)
 
         self._type = None
         self._components.clear()
