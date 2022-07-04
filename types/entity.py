@@ -114,7 +114,7 @@ class Entity(SystemObject, PropertyGroup):
         if animdata is None:
             if not ensure: return
             animdata = self.id_data.animation_data_create()
-        datapath = f'key_blocks["{self.shape().value}"].value'
+        datapath = f'key_blocks["{self.shape.value}"].value'
         fcurve = animdata.drivers.find(datapath)
         if fcurve is None and ensure:
             fcurve = animdata.drivers.new(datapath)
