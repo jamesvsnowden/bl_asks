@@ -485,19 +485,17 @@ class CurveComponent(Component, PropertyGroup):
         row = box.row()
         row.ui_units_y = 0.01
 
-        split = row.split(factor=0.6)
-        row_l = split.row(align=True)
-        row_r = split.row(align=True)
-
-        row_l.prop(self, "interpolation", text="")
-
         ipo = self.interpolation
         
         if ipo == 'CUSTOM':
+            split = row.split(factor=0.6)
+            row_l = split.row(align=True)
+            row_r = split.row(align=True)
+            row_l.prop(self, "interpolation", text="")
+            row_r.alignment = 'RIGHT'
+
             manager.enable_editor(self)
             htypes = {pt.handle_type for pt in node.mapping.curves[0].points if pt.select}
-
-            row_r.alignment = 'RIGHT'
 
             subrow = row_r.row(align=True)
             subrow.alignment = 'CENTER'
@@ -514,11 +512,12 @@ class CurveComponent(Component, PropertyGroup):
 
             subrow.separator()
             subrow.operator("asks.curve_point_remove", text="", icon='X')
-
         elif ipo == 'LINEAR':
-            row_r.label(icon='BLANK1')
+            row.alignment = 'LEFT'
+            row.prop(self, "interpolation", text="")
         else:
-            row_r.prop(self, "easing", text="")
+            row.prop(self, "interpolation", text="")
+            row.prop(self, "easing", text="")
 
         col = box.column()
         col.scale_x = 0.01

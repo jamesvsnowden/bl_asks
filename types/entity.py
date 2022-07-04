@@ -144,6 +144,7 @@ class Entity(SystemObject, PropertyGroup):
         self.influence.__init__(
             name=f'ASKS_{uuid4()}',
             path=f'{self.path}.influence',
+            label="Influence",
             min=0.0,
             max=1.0,
             soft_min=0.0,
@@ -154,6 +155,7 @@ class Entity(SystemObject, PropertyGroup):
         self.weight.__init__(
             name=f'ASKS_{uuid4()}',
             path=f'{self.path}.weight',
+            label="Weight",
             min=0.0,
             max=1.0,
             soft_min=0.0,
