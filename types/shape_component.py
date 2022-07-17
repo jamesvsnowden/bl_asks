@@ -5,7 +5,46 @@ from bpy.types import PropertyGroup
 from bpy.props import BoolProperty, StringProperty
 from .component import Component
 if TYPE_CHECKING:
-    from bpy.types import ShapeKey, UILayout
+    from bpy.types import Driver, FCurve, ShapeKey, UILayout
+
+# Add Container & ContainerEntities
+
+
+class ShapeKeyNameComponent(Component, PropertyGroup):
+
+    def __init__(self, data: 'ShapeKey', path: str) -> None:
+        self["path"] = path
+
+
+class ShapeKeyValueComponent(Component, PropertyGroup):
+
+    @property
+    def data_path(self) -> str:
+        return f'key_blocks["{self.name}"].value'
+
+    def driver(self, ensure: Optional[bool]=True) -> Optional['Driver']:
+        fcurve = self.fcurve(ensure)
+        if fcurve is not None:
+            return fcurve.driver
+
+    def fcurve(self, ensure: Optional[bool]=True) -> Optional['FCurve']:
+        animdata = self.id_data.animation_data
+        if animdata is None:
+            if not ensure:
+                return
+            animdata = self.id_data.animation_data_create()
+        datapath = self.data_path
+        fcurve = animdata.drivers.find(datapath)
+        if fcurve is None:
+            fcurve = animdata.drivers.new(datapath)
+        return fcurve
+
+    def __init__(self, data: 'ShapeKey', path: str) -> None:
+        self["name"] = data.name
+        self["path"] = path
+
+
+
 
 def shapekey_name_subscriber(component: 'ShapeComponent', shapekey: 'ShapeKey') -> None:
     system = component.system
@@ -39,9 +78,6 @@ def shape_target_component_value_set(component: 'ShapeComponent', value: str) ->
 
 
 class ShapeComponent(Component, PropertyGroup):
-
-    SYSTEM_PATH = "shape_components__internal__"
-    asks_idname = "asks.shape"
 
     _owners: Dict[str, object] = {}
 

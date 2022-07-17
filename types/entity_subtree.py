@@ -1,5 +1,7 @@
 
-from typing import Iterator, List, Union, TYPE_CHECKING
+from typing import Iterator, List, Set, Union, TYPE_CHECKING
+
+from utils import symmetrical_target
 if TYPE_CHECKING:
     from .entity import Entity
 
@@ -39,3 +41,4 @@ class EntitySubtree:
 
     def __getitem__(self, key: Union[int, slice]) -> Union['Entity', List['Entity']]:
         return list(self)[key]
+

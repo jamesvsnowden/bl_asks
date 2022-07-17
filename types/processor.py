@@ -2,7 +2,7 @@
 from typing import Callable, Dict, Set, Tuple, Type, Union, TYPE_CHECKING
 from inspect import isclass
 from bpy.types import PropertyGroup
-from bpy.props import CollectionProperty, PointerProperty, StringProperty
+from bpy.props import BoolProperty, CollectionProperty, PointerProperty, StringProperty
 from .system_struct import SystemStruct
 from .reference import Reference
 from .processor_arguments import ProcessorArguments
@@ -24,6 +24,11 @@ class Processor(SystemStruct, PropertyGroup):
 
     handler__internal__: StringProperty(options={'HIDDEN'})
 
+    init: BoolProperty(
+        get=lambda self: self.get("is_init_function", False),
+        options=set()
+        )
+
     @property
     def handler(self) -> Callable:
         return self.system.processors__internal__[self.handler__internal__]
@@ -40,6 +45,7 @@ class Processor(SystemStruct, PropertyGroup):
                  *args: Union[Tuple[Set[str]], Tuple['Component', ...]],
                  **kwargs: Dict[str, Union[str, 'Component']]) -> None:
         self["name"] = kwargs.pop("name", "")
+        self["init"] = kwargs.pop("init", False)
         self.entity.__init__(entity)
         self.handler__internal__ = handler.asks_id
 

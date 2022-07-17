@@ -17,10 +17,6 @@ if TYPE_CHECKING:
 
 class Entity(SystemObject, PropertyGroup):
 
-    @property
-    def ancestors(self) -> Iterator['Entity']:
-        pass
-
     components: PointerProperty(
         name="Components",
         type=EntityComponents,
@@ -36,12 +32,6 @@ class Entity(SystemObject, PropertyGroup):
         get=lambda self: self.get("depth", 0),
         options={'HIDDEN'}
         )
-
-    @property
-    def descendants(self) -> Iterator['Entity']:
-        subtree = iter(self.subtree)
-        next(subtree)
-        yield from subtree
 
     draw: PointerProperty(
         name="Draw",
@@ -119,6 +109,11 @@ class Entity(SystemObject, PropertyGroup):
         if fcurve is None and ensure:
             fcurve = animdata.drivers.new(datapath)
         return fcurve
+
+    def init(self) -> None:
+        for processor in self.processors:
+            if processor.init:
+                processor()
 
     def __init__(self,
                  data: 'ShapeKey',

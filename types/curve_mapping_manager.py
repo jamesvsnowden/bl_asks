@@ -3,7 +3,7 @@
 from typing import Optional, Protocol, TYPE_CHECKING, Sequence, Set, Tuple
 import bpy
 from bpy.types import Operator, PropertyGroup
-from .curve_component import CurveComponent
+from .curve_component import HANDLE_TYPE_ENUM_ITEMS, EXTEND_ENUM_INDEX, CurveComponent
 if TYPE_CHECKING:
     from bpy.types import CurveMapping, ShaderNodeTree, ShaderNodeVectorCurve
 
@@ -49,7 +49,9 @@ def _check_for_updates() -> None:
             if node is not None:
                 mapping = node.mapping
                 if _differ(curve, mapping):
-                    curve.update(mapping.curves[0].points, mapping.extend)
+                    curve["extend"] = EXTEND_ENUM_INDEX[mapping.extend]
+                    curve.points.__init__(mapping.curves[0].points)
+                    curve.update()
     _editing.clear()
 
 
@@ -108,11 +110,7 @@ class ASKS_OT_curve_point_handle_type_set(Operator):
     handle_type: bpy.props.EnumProperty(
         name="Handle Type",
         description="Curve interpolation at this point: Bezier or vector",
-        items=[
-            ('AUTO'        , "Auto Handle"        , "", 'HANDLE_AUTO', 0),
-            ('AUTO_CLAMPED', "Auto Clamped Handle", "", 'HANDLE_AUTOCLAMPED', 1),
-            ('VECTOR'      , "Vector Handle"      , "", 'HANDLE_VECTOR', 2),
-            ],
+        items=HANDLE_TYPE_ENUM_ITEMS,
         default='AUTO',
         options=set(),
         )

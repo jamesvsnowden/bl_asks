@@ -22,7 +22,10 @@ class Reference(SystemStruct, PropertyGroup):
 
     @property
     def tags(self) -> Set[str]:
-        return set(self.tags__internal__)
+        return set(self.tags__internal__.keys())
+
+    def __bool__(self) -> bool:
+        return bool(self.path)
 
     def __call__(self) -> 'SystemObject':
         return self.id_data.path_resolve(self.path)

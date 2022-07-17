@@ -13,6 +13,43 @@ if TYPE_CHECKING:
     from bpy.types import UILayout
 
 
+EASING_ENUM_ITEMS = [
+    ('EASE_IN'    , "In"      , "Ease in"        , 'IPO_EASE_IN'    , 0),
+    ('EASE_OUT'   , "Out"     , "Ease out"       , 'IPO_EASE_OUT'   , 1),
+    ('EASE_IN_OUT', "In & Out", "Ease in and out", 'IPO_EASE_IN_OUT', 2),
+    ]
+
+EASING_ENUM_INDEX = {_item[0]: _item[4] for _item in EASING_ENUM_ITEMS}
+
+EXTEND_ENUM_ITEMS = [
+    ('HORIZONTAL'  , "Horizontal"  , ""),
+    ('EXTRAPOLATED', "Extrapolated", ""),
+    ]
+
+EXTEND_ENUM_INDEX = {_item[0]: _index for _index, _item in enumerate(EXTEND_ENUM_ITEMS)}
+
+HANDLE_TYPE_ENUM_ITEMS = [
+    ('AUTO'        , "Auto Handle"        , "", 'HANDLE_AUTO', 0),
+    ('AUTO_CLAMPED', "Auto Clamped Handle", "", 'HANDLE_AUTOCLAMPED', 1),
+    ('VECTOR'      , "Vector Handle"      , "", 'HANDLE_VECTOR', 2),
+    ]
+
+HANDLE_TYPE_ENUM_INDEX = {_item[0]: _item[4] for _item in HANDLE_TYPE_ENUM_ITEMS}
+
+INTERPOLATION_ENUM_ITEMS = [
+    ('LINEAR', "Linear"      , "Linear"          , 'IPO_LINEAR', 0),
+    ('SINE'  , "Sinusoidal"  , "Sinusoidal"      , 'IPO_SINE'  , 1),
+    ('QUAD'  , "Quadratic"   , "Quadratic"       , 'IPO_QUAD'  , 2),
+    ('CUBIC' , "Cubic"       , "Cubic"           , 'IPO_CUBIC' , 3),
+    ('QUART' , "Quartic"     , "Quartic"         , 'IPO_QUART' , 4),
+    ('QUINT' , "Quintic"     , "Quintic"         , 'IPO_QUINT' , 5),
+    None,
+    ('CUSTOM', "Custom"      , "Use custom curve", 'FCURVE'    , 6),
+    ]
+
+INTERPOLATION_ENUM_INDEX = {_item[0]: _item[4] for _item in INTERPOLATION_ENUM_ITEMS if _item}
+
+
 class CurvePointProtocol(Protocol):
     location: Tuple[float, float]
     handle_type: str
@@ -214,11 +251,7 @@ class CurveComponentPoint(PropertyGroup):
     handle_type: EnumProperty(
         name="Handle Type",
         description="Curve interpolation at this point: Bezier or vector",
-        items=[
-            ('AUTO'        , "Auto Handle"        , ""),
-            ('AUTO_CLAMPED', "Auto Clamped Handle", ""),
-            ('VECTOR'      , "Vector Handle"      , ""),
-            ],
+        items=HANDLE_TYPE_ENUM_ITEMS,
         default='AUTO_CLAMPED',
         options=set(),
         update=lambda self, _: self.curve.process()
@@ -243,7 +276,7 @@ class CurveComponentPoint(PropertyGroup):
         )
 
     def __init__(self, point: CurvePointProtocol) -> None:
-        self["handle_type"] = ('AUTO', 'AUTO_CLAMPED', 'VECTOR').index(point.handle_type)
+        self["handle_type"] = HANDLE_TYPE_ENUM_INDEX.index(point.handle_type)
         self["location"] = tuple(point.location)
         self["select"] = point.select
 
@@ -257,6 +290,22 @@ class CurveComponentPoints(PropertyGroup):
 
     def __contains__(self, point: CurveComponentPoint) -> bool:
         return any(x == point for x in self)
+
+    def __init__(self, points: Sequence[CurvePointProtocol]) -> None:
+        items = self.points.collection__internal__
+        length = len(items)
+        number = len(points)
+
+        while length > number:
+            items.remove(0)
+            length -= 1
+
+        while length < number:
+            items.add()
+            length += 1
+
+        for item, point in zip(items, points):
+            item.__init__(point)
 
     def __iter__(self) -> Iterator[CurveComponentPoint]:
         return iter(self.collection__internal__)
@@ -387,32 +436,74 @@ class CurveComponentPoints(PropertyGroup):
         return data
 
 
+def curve_component_interpolation_update(component: 'CurveComponent', _=None) -> None:
+    if component.interpolation != 'CUSTOM':
+        component.points.__init__(curve_component_preset_get(component))
+    curve_component_interpolation_mirror(component)
+
+
+def curve_component_interpolation_mirror(component: 'CurveComponent') -> None:
+    mirror = component.mirror
+    if mirror:
+        try:
+            symtarget = mirror()
+        except ValueError:
+            component.system.log.warning(f'{component} mirror {mirror} not found.')
+        else:
+            symtarget["interpolation"] = INTERPOLATION_ENUM_INDEX[component.interpolation]
+            if symtarget.interpolation != 'CUSTOM':
+                symtarget.points.__init__(curve_component_preset_get(symtarget))
+
+
+def curve_component_easing_update(component: 'CurveComponent', _=None) -> None:
+    if component.interpolation != 'CUSTOM':
+        component.points.__init__(curve_component_preset_get(component))
+    curve_component_easing_mirror(component)
+
+
+def curve_component_easing_mirror(component: 'CurveComponent') -> None:
+    mirror = component.mirror
+    if mirror:
+        try:
+            symtarget = mirror()
+        except ValueError:
+            component.system.log.warning(f'{component} mirror {mirror} not found.')
+        else:
+            symtarget["easing"] = EASING_ENUM_INDEX[component.easing]
+            if symtarget.interpolation != 'CUSTOM':
+                symtarget.points.__init__(curve_component_preset_get(symtarget))
+
+
 def curve_component_preset_get(component: 'CurveComponent') -> Sequence[CurvePoint]:
     ipo = component.interpolation
     return PRESETS[ipo] if ipo == 'LINEAR' else PRESETS[f'{ipo}{component.easing[4:]}']
 
 
-def curve_component_extend_update(component: 'CurveComponent', _) -> None:
+def curve_component_extend_update(component: 'CurveComponent', _=None) -> None:
     component.process()
+    curve_component_extend_mirror(component)
 
 
-def curve_component_preset_update(component: 'CurveComponent', _) -> None:
-    if component.interpolation != 'CUSTOM':
-        component.update(curve_component_preset_get(component), component.extend)
+def curve_component_extend_mirror(component: 'CurveComponent') -> None:
+    mirror = component.mirror
+    if mirror:
+        try:
+            symtarget = mirror()
+        except ValueError:
+            component.system.log.warning(f'{component} mirror {mirror} not found.')
+        else:
+            symtarget["extend"] = component.extend
+            symtarget.process()
 
 
 class CurveComponent(Component, PropertyGroup):
 
     easing: EnumProperty(
         name="Easing",
-        items=[
-            ('EASE_IN'    , "In"      , "Ease in"        , 'IPO_EASE_IN'    , 0),
-            ('EASE_OUT'   , "Out"     , "Ease out"       , 'IPO_EASE_OUT'   , 1),
-            ('EASE_IN_OUT', "In & Out", "Ease in and out", 'IPO_EASE_IN_OUT', 2),
-            ],
+        items=EASING_ENUM_ITEMS,
         default='EASE_IN_OUT',
         options=set(),
-        update=curve_component_preset_update
+        update=curve_component_easing_update
         )
 
     extend: EnumProperty(
@@ -429,19 +520,10 @@ class CurveComponent(Component, PropertyGroup):
 
     interpolation: EnumProperty(
         name="Interpolation",
-        items=[
-            ('LINEAR', "Linear"      , "Linear"          , 'IPO_LINEAR', 0),
-            ('SINE'  , "Sinusoidal"  , "Sinusoidal"      , 'IPO_SINE'  , 1),
-            ('QUAD'  , "Quadratic"   , "Quadratic"       , 'IPO_QUAD'  , 2),
-            ('CUBIC' , "Cubic"       , "Cubic"           , 'IPO_CUBIC' , 3),
-            ('QUART' , "Quartic"     , "Quartic"         , 'IPO_QUART' , 4),
-            ('QUINT' , "Quintic"     , "Quintic"         , 'IPO_QUINT' , 5),
-            None,
-            ('CUSTOM', "Custom"      , "Use custom curve", 'FCURVE'    , 6),
-            ],
+        items=INTERPOLATION_ENUM_ITEMS,
         default='LINEAR',
         options=set(),
-        update=curve_component_preset_update
+        update=curve_component_interpolation_update
         )
 
     points: PointerProperty(
@@ -452,8 +534,7 @@ class CurveComponent(Component, PropertyGroup):
 
     def __init__(self, **properties: Dict[str, Any]) -> None:
         super().__init__(**properties)
-        for point in curve_component_preset_get(self):
-            self.points.collection__internal__.add().__init__(point)
+        self.points.__init__(curve_component_preset_get(self))
         self.system.curve_mapping_manager.node_set(self.name, self)
 
     def __onfileload__(self) -> None:
@@ -463,6 +544,13 @@ class CurveComponent(Component, PropertyGroup):
 
     def __ondisposed__(self) -> None:
         self.system.curve_mapping.node_remove(self.name)
+
+    def __onsymmetry__(self, symtarget: 'Component') -> None:
+        symtarget["interpolation"] = INTERPOLATION_ENUM_INDEX[self.interpolation]
+        symtarget["easing"] = EASING_ENUM_INDEX[self.easing]
+        symtarget["extend"] = EXTEND_ENUM_ITEMS[self.extend]
+        symtarget.points.__init__(self.points)
+        symtarget.process()
 
     def draw(self, layout: 'UILayout', label: Optional[str]=None) -> None:
         manager = self.system.curve_mapping_manager
@@ -534,32 +622,11 @@ class CurveComponent(Component, PropertyGroup):
         self.system.curve_mapping_manager.node_set(self.name, self)
         super().process()
 
-    def update(self,
-               points: Optional[Sequence[CurvePointProtocol]]=None,
-               extend: Optional[str]="") -> None:
-
-        if points:
-            items = self.points.collection__internal__
-            l = len(items)
-            n = len(points)
-            while l > n:
-                items.remove(0)
-                l -= 1
-            while l < n:
-                items.add()
-                l += 1
-            for item, point in zip(items, points):
-                item.__init__(point)
-
-        if extend:
-            self["extend"] = extend
-
+    def update(self) -> None:
         points = list(self.points)
         ptsort = sorted(points, key=point_location_x)
-
         if points != ptsort:
             ptsort = [CurvePoint(pt.location, pt.handle_type, pt.select) for pt in ptsort]
             for point, data in zip(points, ptsort):
                 point.__init__(data)
-
         self.process()

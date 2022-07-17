@@ -52,6 +52,34 @@ class EntityComponents(ReferenceCollection[Component], SystemStruct, PropertyGro
         for processor in processes:
             processor()
 
+    def mirror(self, component: Component, symmetry: Component) -> None:
+
+        if not isinstance(component, Component):
+            raise TypeError((f'{self.__class__.__name__}.mirror(component, symmetry): '
+                             f'Expected component to be Component, '
+                             f'not {component.__class__.__name__}'))
+
+        if not isinstance(symmetry, Component):
+            raise TypeError((f'{self.__class__.__name__}.mirror(component, symmetry): '
+                             f'Expected symmetry to be Component, '
+                             f'not {symmetry.__class__.__name__}'))
+
+        if type(component) != type(symmetry):
+            raise TypeError((f'{self.__class__.__name__}.mirror(component, symmetry): '
+                             f'Expected component and symmetry to have the same type.'))
+
+        if component == symmetry:
+            raise ValueError((f'{self.__class__.__name__}.mirror(component, symmetry): '
+                              f'{component} cannot be mirrored to itself'))
+
+        if component not in self:
+            raise ValueError((f'{self.__class__.__name__}.mirror(component, symmetry): '
+                              f'{component} is not a component of {self.entity}'))
+
+        component.mirror.__init__(symmetry)
+        symmetry.mirror.__init__(component)
+        component.__onsymmetry__(symmetry)
+
     def detach(self, component: Component) -> None:
         
         if not isinstance(component, Component):

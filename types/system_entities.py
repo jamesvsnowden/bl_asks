@@ -1,15 +1,35 @@
 
 from typing import Any, Dict, Iterator, List, Optional, Union
 from bpy.types import PropertyGroup, ShapeKey
-from bpy.props import CollectionProperty
+from bpy.props import CollectionProperty, IntProperty
 from .system_struct import SystemStruct
 from .reference import Reference
 from .entity import Entity
 
 class SystemEntities(SystemStruct, PropertyGroup):
 
-    reverselut__internal__: CollectionProperty(type=Reference, options={'HIDDEN'})
-    collection__internal__: CollectionProperty(type=Entity, options={'HIDDEN'})
+    reverselut__internal__: CollectionProperty(
+        type=Reference,
+        options={'HIDDEN'}
+        )
+
+    collection__internal__: CollectionProperty(
+        type=Entity,
+        options={'HIDDEN'}
+        )
+
+    active_index: IntProperty(
+        name="Shape Key",
+        min=0,
+        default=0,
+        options=set()
+        )
+
+    @property
+    def active(self) -> Optional[Entity]:
+        index = self.active_index
+        if index < len(self):
+            return self.collection__internal__[index]
 
     def __contains__(self, key: Union[str, ShapeKey]) -> bool:
         if isinstance(key, ShapeKey):
@@ -53,6 +73,8 @@ class SystemEntities(SystemStruct, PropertyGroup):
             raise ValueError()
         entity = self.collection__internal__.add()
         entity.__init__(shapekey, **properties)
+        entity["index"] = len(self) - 1
+        entity["depth"] = 0
         self.reverselut__internal__.add().__init__(entity, name=shapekey.name)
         return entity
 

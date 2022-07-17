@@ -44,6 +44,7 @@ class SystemComponents(SystemStruct, PropertyGroup):
                                 f'Failed to resolve component collection at path: "{path}"'))
         else:
             component = data.add()
+            component["type"] = type
             component["name"] = f'ASKS_{uuid4()}'
             component["path"] = f'{path}["{component.name}"]'
             component.__init__(**properties)

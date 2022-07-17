@@ -1,7 +1,7 @@
 
 from typing import Any, Dict, Optional, Sequence, Union, TYPE_CHECKING
 from bpy.types import PropertyGroup
-from bpy.props import FloatProperty, StringProperty
+from bpy.props import BoolProperty, FloatProperty, StringProperty
 from rna_prop_ui import rna_idprop_ui_create
 from .component import Component
 if TYPE_CHECKING:
@@ -108,6 +108,12 @@ class IDPropertyComponent(Component, PropertyGroup):
         options=set()
         )
 
+    use_slider: BoolProperty(
+        name="Slider",
+        default=True,
+        options=set()
+        )
+
     def __init__(self, **properties: Dict[str, Any]) -> None:
         super().__init__(**properties)
         settings = {}
@@ -121,14 +127,17 @@ class IDPropertyComponent(Component, PropertyGroup):
 
     def draw(self, layout: 'UILayout', label: Optional[str]=None) -> None:
         text = self.label if label is None else label
-        layout.prop(self.id_data, self.data_path, text=text)
+        layout.prop(self.id_data, self.data_path, text=text, slider=self.use_slider)
 
     def update(self,
                value: Optional[Union[float, Sequence[float]]]=None,
                **options: Dict[str, Any]) -> None:
+
         if value is not None:
             self.id_data[self.name] = value
+
         if options:
-            for key, value in options.items(): self[key] = value
+            for key, value in options.items():
+                self[key] = value
             self.id_data.id_properties_ui(self.name).update(**options)
         self.process()

@@ -1,10 +1,10 @@
 
 from dataclasses import dataclass
-from typing import Callable, Optional, Sequence, Tuple, Type, TYPE_CHECKING
+from typing import Callable, Optional, Sequence, Set, Tuple, Type, TYPE_CHECKING
 from contextlib import suppress
 from uuid import uuid4
 from bpy.types import Context, Key, Object, Operator, PropertyGroup, MESH_MT_shape_key_context_menu
-from bpy.props import CollectionProperty, PointerProperty
+from bpy.props import BoolProperty, CollectionProperty, PointerProperty, StringProperty
 from bpy.utils import register_class, unregister_class
 from bpy.app.handlers import load_post, persistent
 from .types.component import Component
@@ -29,13 +29,20 @@ SYM_SFIX_LUT = {f'{a}{sep}': f'{b}{sep}' for a, b in SYM_AFIX_PAIRS for sep in S
 SYM_PFIX_LUT = {f'{sep}{a}': f'{sep}{b}' for a, b in SYM_AFIX_PAIRS for sep in SYM_AFIX_SEPRS}
 
 
+def _ensure_entities(key: Key) -> None:
+    entities = key.asks.entities
+    for shape in key.key_blocks:
+        if shape not in entities:
+            entities.create(shape)
+
+
 @persistent
 def _on_file_load(_) -> None:
     import bpy
     for key in bpy.data.shape_keys:
-        if key.is_property_set("asks"):
-            for component in key.asks.components:
-                component.__onfileload__()
+        _ensure_entities(key)
+        for component in key.asks.components:
+            component.__onfileload__()
 
 
 @dataclass
@@ -88,26 +95,296 @@ def set_keyframe_points(fcurve: 'FCurve', points: Sequence['KeyframePoint']) -> 
         frame.handle_right = point.handle_right
 
 
-def _sympfix(name: str) -> str:
-    return next((afix for afix in SYM_SFIX_LUT if name.startswith(afix)), "")
-
-
-def _symsfix(name: str) -> str:
-    return next((afix for afix in SYM_PFIX_LUT if name.endswith(afix)), "")
-
-
 def split_symmetrical(name: str) -> Tuple[str, str, str]:
     """
     Splits the data block name into its symmetrical prefix, base name and symmetrical suffix.
     """
     assert isinstance(name, str)
-    afix = _symsfix(name)
+    afix = next((x for x in SYM_SFIX_LUT if name.startswith(x)), "")
     if afix:
         return "", name[:-len(afix)], afix
-    afix = _sympfix(name)
+    afix = next((x for x in SYM_PFIX_LUT if name.endswith(x)), "")
     if afix:
         return afix, name[len(afix)], ""
     return "", name, ""
+
+
+def symmetrical_target(name: str) -> str:
+    """
+    Returns the name of the symmetrical data block if the name is symmetrical,
+    otherwise returns an emptpy string.
+    """
+    afix = next((afix for afix in SYM_PFIX_LUT if name.endswith(afix)), "")
+    if afix:
+        return f'{name[:-len(afix)]}{SYM_PFIX_LUT[afix]}'
+    afix = next((afix for afix in SYM_SFIX_LUT if name.startswith(afix)), "")
+    if afix:
+        return f'{SYM_SFIX_LUT[afix]}{name[len(afix):]}'
+    return ""
+
+
+def entity_clone(object: Object, entity: Entity, options: Set[str]) -> Entity:
+    name = entity.shape.value
+    if 'MIRROR' in options:
+        
+
+def subtree_clone(object: Object,
+                  subtree: EntitySubtree,
+                  options: Set[str]) -> EntitySubtree:
+    for entity in subtree:
+        name = entity.shape.value
+        if mirror:
+            name = symmetrical_target(name) or name
+        shape = object.shape_key_add(name=name, from_mix=False)
+
+# Duplicate
+# Duplicate & Mirror (Topological=True|False, Link=True|False)
+
+# each component has
+# - SYMMETRICAL option
+# - symmetry_target reference
+# - mirroring__internal__ flag to prevent recursion
+# - optional draw_symmetry_options function
+# - optional __onsymmetry__ function to handle updating the symmetry target
+
+# components with the SYMMETRICAL option are copied rather than linked
+
+
+def clone_shape_key(object: Object,
+                    shape: ShapeKey,
+                    mirror: Optional[bool]=False) -> ShapeKey:
+
+    if mirror:
+        name = symmetrical_target(shape.name) or f'{shape.name}_copy'
+    else:
+        name = f'{shape.name}_copy'
+
+    clone = object.shape_key_add(name=name, from_mix=False)
+
+    data = [vert.co.copy() for vert in shape.data]
+    if mirror:
+        scale = Vector((-1.0, 1.0, 1.0))
+        for vec in data:
+            vec *= scale
+
+    for vert, vec in zip(clone.data, data):
+        vert.co = vec
+
+    clone.slider_min = shape.slider_min
+    clone.slider_max = shape.slider_max
+    clone.value = shape.value
+
+    grp = shape.vertex_group
+    if grp:
+        if mirror:
+            grp = symmetrical_target(grp) or grp
+        clone.vertex_group = grp
+
+    rel = shape.relative_key
+    if rel:
+        if mirror:
+            tgt = symmetrical_target(rel.name)
+            if tgt:
+                rel = shape.id_data.key_blocks.get(tgt, rel)
+        clone.relative_key = rel
+
+    return clone
+
+
+
+class ASKS_OT_shape_key_add(Operator):
+
+    bl_idname = "asks.shape_key_add"
+    bl_label = "New Shape Key"
+    bl_options = {'INTERNAL', 'UNDO'}
+
+    from_mix: BoolProperty(
+        name="From Mix",
+        default=False,
+        options=set()
+        )
+
+    name: StringProperty(
+        name="Name",
+        default="Key",
+        options=set()
+        )
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        if validate_context(context):
+            object = context.object
+            return object is not None and supports_shape_keys(object)
+
+    def invoke(self, context: Context, _) -> Set[str]:
+        return context.window_manager.invoke_props_dialog(self)
+
+    def draw(self, _) -> None:
+        layout = self.layout
+        layout.use_property_split = True
+        layout.prop(self, "name")
+        layout.prop(self, "from_mix")
+
+    def execute(self, context: Context) -> Set[str]:
+        shape = context.object.shape_key_add(name=self.name, from_mix=self.from_mix)
+        key = shape.id_data
+        system = key.asks
+        entities = system.entities
+        entity = entities.create(shape)
+
+        active = entities.active
+        if active:
+            index = active.index + len(active.subtree)
+            entity["index"] = index
+            entity["depth"] = active.depth
+            entities.collection__internal__.move(len(entities)-1, index)
+            for item in entities[index+1:]:
+                item["index"] = item.index + 1
+            # TODO move shape to correct index ?
+
+        return {'FINISHED'}
+
+
+class ASKS_OT_shape_key_remove(Operator):
+
+    bl_idname = "asks.shape_key_remove"
+    bl_label = "Remove Shape Key"
+    bl_options = {'INTERNAL', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        if validate_context(context):
+            object = context.object
+            if object is not None and supports_shape_keys(object):
+                key = object.data.shape_keys
+                return key is not None and key.asks.entities.active is not None
+
+    def execute(self, context: Context) -> Set[str]:
+        return {'FINISHED'}
+
+
+
+class ASKS_OT_shape_key_duplicate(Operator):
+
+    bl_idname = "asks.shape_key_duplicate"
+    bl_label = "Duplicate Shape Key"
+    bl_options = {'INTERNAL', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        if validate_context(context):
+            object = context.object
+            if object is not None and supports_shape_keys(object):
+                return object.active_shape_key is not None
+
+    def execute(self, context: Context) -> Set[str]:
+        object = context.object
+
+        shape = object.active_shapekey
+        clone = object.shape_key_add(name=f'{shape.name}_copy', from_mix=False)
+
+        clone.relative_key = shape.relative_key
+        clone.vertex_group = shape.vertex_group
+        clone.slider_min = shape.slider_min
+        clone.slider_max = shape.slider_max
+        clone.value = shape.value
+
+        for source, target in zip(shape.data, clone.data):
+            target.co = source.co
+
+        # foreach entity in subtree
+        # - clone entity (duplicating shape & props)
+        # - create references to components
+        # foreach entity in new subtree
+        # - if _copy exists
+
+        key = shape.id_data
+        if key.is_property_set("asks"):
+            system = key.asks
+            entity = system.entities.get(shape)
+            if entity:
+                eclone = system.entities.create(clone)
+                ctable = {}
+
+                for item in entity.subtree:
+                    copy = 
+
+                # Duplicate components
+                for ref in entity.components.collection__internal__:
+                    com = ref()
+                    cpy = system.components.create(com.type, **com.__properties__())
+                    eclone.components.attach(cpy)
+                    ctable[com.name] = cpy
+                
+                for srcproc in entity.processors:
+                    tgtproc = eclone.processors.collection__internal__.add()
+                    tgtproc["name"] = srcproc.name
+                    tgtproc.entity.__init__(eclone)
+                    tgtproc["handler__internal__"] = srcproc.handler__internal__
+
+                eclone.init()
+
+
+        return {'FINISHED'}
+
+
+
+class ASKS_OT_duplicate_and_mirror(Operator):
+
+    bl_idname = "asks.duplicate_and_mirror"
+    bl_label = "Duplicate & Mirror"
+    bl_options = {'INTERNAL', 'UNDO'}
+
+    topological: BoolProperty(
+        name="Topological",
+        default=False,
+        options=set()
+        )
+
+    link: BoolProperty(
+        name="Link",
+        default=True,
+        options=set()
+        )
+
+    @classmethod
+    def poll(cls, context: Context) -> bool:
+        if validate_context(context):
+            object = context.object
+            if object is not None and supports_shape_keys(object):
+                shapekey = object.active_shape_key
+                if shapekey is not None:
+                    name = symmetrical_target(shapekey.name)
+                    return bool(name) and name not in shapekey.id_data.key_blocks
+
+    def invoke(self, context: Context, event: 'Event') -> Set[str]:
+        return context.window_manager.invoke_props_dialog(self)
+
+    def draw(self, context: Context) -> None:
+        layout = self.layout
+        layout.use_property_split = True
+        layout.prop(self, "topological")
+
+        shapekey = context.object.active_shape_key
+        key = shapekey.id_data
+        if key.is_property_set("asks") and shapekey in key.asks.entities:
+            layout.prop(self, "link")
+
+    def execute(self, context: Context) -> Set[str]:
+        object = context.object
+        shape = object.active_shape_key
+
+        subtree = []
+        
+        # duplicate shape key(s)
+
+        # recursively mirror shapes
+
+
+        return {'FINISHED'}
+
+
+
 
 class namespace:
 

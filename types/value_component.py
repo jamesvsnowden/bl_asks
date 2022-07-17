@@ -1,5 +1,5 @@
 
-from typing import Optional, TYPE_CHECKING
+from typing import Any, Dict, Optional, TYPE_CHECKING
 from bpy.types import PropertyGroup
 from bpy.props import FloatProperty
 from .component import Component
@@ -9,12 +9,18 @@ if TYPE_CHECKING:
 
 def value_component_value_update(component: 'ValueComponent', _) -> None:
     component.process()
+    mirror = component.mirror
+    if mirror:
+        try:
+            symtarget = mirror()
+        except ValueError:
+            component.system.log.warning(f'{component} mirror {mirror} not found.')
+        else:
+            symtarget["value"] = component.value
+            symtarget.process()
 
 
 class ValueComponent(Component, PropertyGroup):
-
-    SYSTEM_PATH = "value_components__internal__"
-    asks_idname = "asks.value"
 
     value: FloatProperty(
         name="Value",
@@ -30,3 +36,6 @@ class ValueComponent(Component, PropertyGroup):
     def draw(self, layout: 'UILayout', label: Optional[str]=None) -> None:
         text = self.label if label is None else label
         layout.prop(self, "value", text=text)
+
+    def __properties__(self) -> Dict[str, Any]:
+        return dict(super().__properties__(), value=self.value)
